@@ -1,0 +1,4 @@
+NAME="Autoton"
+BUILD_DIR="build"
+FILES="README.md LICENSE *.lua res/"
+# vim:set ft=zsh:
