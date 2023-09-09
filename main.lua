@@ -64,7 +64,7 @@ function love.load()
 	Images.ore_iron = love.graphics.newImage("res/gfx/ore-iron.png")
 	Images.ore_gold = love.graphics.newImage("res/gfx/ore-gold.png")
 
-    generateMap()
+	generateMap()
 	dumpMap()
 end
 
@@ -162,6 +162,51 @@ function love.update(dt)
 end
 
 local spacing = love.graphics.getWidth() / cellAmount
+
+---@param x integer
+---@param y integer
+---@param cell Cell
+local function drawCell(x, y, cell)
+	local image
+	local type = cell.type
+
+	love.graphics.setColor(1, 1, 1)
+
+	if type == CellType.CONVEYOR then
+		image = Images.conveyor
+	elseif type == CellType.JUNCTION then
+		image = Images.junction
+	elseif type == CellType.GENERATOR then
+		image = Images.generator
+	elseif type == CellType.ORE then
+		if cell.content.name == ContentType.IRON then
+			image = Images.ore_iron
+		elseif cell.content.name == ContentType.GOLD then
+			image = Images.ore_gold
+		end
+	end
+
+	if image then
+		local offsetX = 0
+		local offsetY = 0
+		if cell.direction == 1 then
+			offsetX = spacing
+		elseif cell.direction == 2 then
+			offsetX = spacing
+			offsetY = spacing
+		elseif cell.direction == 3 then
+			offsetY = spacing
+		end
+		love.graphics.draw(
+			image,
+			(x - 1) * spacing + offsetX,
+			(y - 1) * spacing + offsetY,
+			cell.direction * math.pi / 2,
+			spacing / 128,
+			spacing / 128
+		)
+	end
+end
 
 ---@diagnostic disable-next-line: duplicate-set-field
 function love.draw()
@@ -280,50 +325,5 @@ function love.keypressed(key)
 				rotation = rotation + 1
 			end
 		end
-	end
-end
-
----@param x integer
----@param y integer
----@param cell Cell
-function drawCell(x, y, cell)
-	local image
-	local type = cell.type
-
-	love.graphics.setColor(1, 1, 1)
-
-	if type == CellType.CONVEYOR then
-		image = Images.conveyor
-	elseif type == CellType.JUNCTION then
-		image = Images.junction
-	elseif type == CellType.GENERATOR then
-		image = Images.generator
-	elseif type == CellType.ORE then
-		if cell.content.name == ContentType.IRON then
-			image = Images.ore_iron
-		elseif cell.content.name == ContentType.GOLD then
-			image = Images.ore_gold
-		end
-	end
-
-	if image then
-		local offsetX = 0
-		local offsetY = 0
-		if cell.direction == 1 then
-			offsetX = spacing
-		elseif cell.direction == 2 then
-			offsetX = spacing
-			offsetY = spacing
-		elseif cell.direction == 3 then
-			offsetY = spacing
-		end
-		love.graphics.draw(
-			image,
-			(x - 1) * spacing + offsetX,
-			(y - 1) * spacing + offsetY,
-			cell.direction * math.pi / 2,
-			spacing / 128,
-			spacing / 128
-		)
 	end
 end
