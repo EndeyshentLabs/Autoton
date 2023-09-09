@@ -16,13 +16,13 @@ Content = {}
 ---@param amount? integer
 ---@return Content
 function Content:new(name, amount)
-    local public = {}
-    public.name = name or DEFAULT_CONTENT_NAME
-    public.amount = amount or 0
+	local public = {}
+	public.name = name or DEFAULT_CONTENT_NAME
+	public.amount = amount or 0
 
-    setmetatable(public, self)
-    self.__index = self
-    return public
+	setmetatable(public, self)
+	self.__index = self
+	return public
 end
 
 ---@enum CellType
@@ -62,13 +62,13 @@ Cell = {}
 ---@param under? Cell
 ---@return Cell
 function Cell:new(type, direction, content, under)
-    local public = {}
-    public.type = type
-    public.direction = direction or 0
-    public.content = content or Content:new()
-    public.under = under
+	local public = {}
+	public.type = type
+	public.direction = direction or 0
+	public.content = content or Content:new()
+	public.under = under
 
-    setmetatable(public, self)
-    self.__index = self
-    return public
+	setmetatable(public, self)
+	self.__index = self
+	return public
 end
