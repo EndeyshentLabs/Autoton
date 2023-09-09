@@ -13,24 +13,7 @@ local function dumpMap()
 	end
 end
 
-function love.load()
-	if isDebug() then
-		---@diagnostic disable-next-line: lowercase-global
-		vudu = require("lib.vudu.vudu")
-		vudu:initialize()
-	end
-
-	Cells = {}
-
-	Font = love.graphics.newFont("res/fonts/fira.ttf", 15)
-
-	Images = {}
-	Images.conveyor = love.graphics.newImage("res/gfx/conveyor.png")
-	Images.junction = love.graphics.newImage("res/gfx/junction.png")
-	Images.generator = love.graphics.newImage("res/gfx/generator.png")
-	Images.ore_iron = love.graphics.newImage("res/gfx/ore-iron.png")
-	Images.ore_gold = love.graphics.newImage("res/gfx/ore-gold.png")
-
+local function generateMap()
 	local oreGrid = {}
 	local baseX = 10000 * love.math.random()
 	local baseY = 10000 * love.math.random()
@@ -61,7 +44,27 @@ function love.load()
 			Cells[x][y] = Cell:new(type, nil, Content:new(contentName))
 		end
 	end
+end
 
+function love.load()
+	if isDebug() then
+		---@diagnostic disable-next-line: lowercase-global
+		vudu = require("lib.vudu.vudu")
+		vudu:initialize()
+	end
+
+	Cells = {}
+
+	Font = love.graphics.newFont("res/fonts/fira.ttf", 15)
+
+	Images = {}
+	Images.conveyor = love.graphics.newImage("res/gfx/conveyor.png")
+	Images.junction = love.graphics.newImage("res/gfx/junction.png")
+	Images.generator = love.graphics.newImage("res/gfx/generator.png")
+	Images.ore_iron = love.graphics.newImage("res/gfx/ore-iron.png")
+	Images.ore_gold = love.graphics.newImage("res/gfx/ore-gold.png")
+
+    generateMap()
 	dumpMap()
 end
 
