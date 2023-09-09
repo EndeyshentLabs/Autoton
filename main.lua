@@ -1,87 +1,95 @@
+---@diagnostic disable: unused-local
 require("utils")
+require("cell")
 
 local cellAmount = 20
 local rotation = 0
-
----@enum CellTypes
-local CellType = {
-	GENERATOR = 1,
-	CONVEYOR = 2,
-}
-
----@enum ContentType
-local ContentType = {
-	IRON = "iron",
-}
-
-function CellType.tostring(cellType)
-	if cellType == 1 then
-		return "GENERATOR"
-	elseif cellType == 2 then
-		return "CONVEYOR"
-	elseif cellType == 0 then
-		return "(void)"
-	end
-end
 
 local function dumpMap()
 	for x, _ in pairs(Cells) do
 		for y, cell in pairs(Cells[x]) do
 			print(x, y, CellType.tostring(cell.type), cell.content.name, cell.content.amount)
-			-- print(x, y, cell.type, cell.content.name, cell.content.amount)
 		end
 	end
 end
 
-local DEFAULT_CONTENT_NAME = "OH_NO"
-
 function love.load()
+	if isDebug() then
+		---@diagnostic disable-next-line: lowercase-global
+		vudu = require("lib.vudu.vudu")
+		vudu:initialize()
+	end
+
+	Cells = {}
+
 	Font = love.graphics.newFont("res/fonts/fira.ttf", 15)
 
 	Images = {}
 	Images.conveyor = love.graphics.newImage("res/gfx/conveyor.png")
+	Images.junction = love.graphics.newImage("res/gfx/junction.png")
 	Images.generator = love.graphics.newImage("res/gfx/generator.png")
+	Images.ore_iron = love.graphics.newImage("res/gfx/ore-iron.png")
+	Images.ore_gold = love.graphics.newImage("res/gfx/ore-gold.png")
 
-	Cells = {}
+	local oreGrid = {}
+	local baseX = 10000 * love.math.random()
+	local baseY = 10000 * love.math.random()
+
+	for x = 1, cellAmount do
+		oreGrid[x] = {}
+		for y = 1, cellAmount do
+			oreGrid[x][y] = love.math.noise(baseX + 0.1 * x, baseY + 0.1 * y)
+		end
+	end
 
 	for x = 1, cellAmount, 1 do
 		Cells[x] = {}
+
 		for y = 1, cellAmount, 1 do
-			Cells[x][y] = {
-				["type"] = 0,
-				["direction"] = 0,
-				["content"] = {
-					["name"] = DEFAULT_CONTENT_NAME,
-					["amount"] = 0,
-				},
-			}
+			local type = 0
+			local contentName = DEFAULT_CONTENT_NAME
+
+			if oreGrid[x][y] > 0.5 then
+				type = CellType.ORE
+				if love.math.random(1, 2) == 1 then
+					contentName = ContentType.IRON
+				else
+					contentName = ContentType.GOLD
+				end
+			end
+
+			Cells[x][y] = Cell:new(type, nil, Content:new(contentName))
 		end
 	end
 
 	dumpMap()
 end
 
+---@diagnostic disable-next-line: duplicate-set-field
 function love.update(dt)
 	for x, _ in pairs(Cells) do
 		for y, cell in pairs(Cells[x]) do
 			local type = cell.type
 
 			if type == CellType.GENERATOR then
-				if not Cells[x][y + 1] then
+				if
+					y + 1 > cellAmount
+					or Cells[x][y + 1].type ~= CellType.CONVEYOR
+					or not cell.under
+					or Cells[x][y].under.content.name == DEFAULT_CONTENT_NAME
+				then
 					goto continue
 				end
 
-				if Cells[x][y + 1].type == CellType.CONVEYOR then
-					if
-						Cells[x][y + 1].content.name == ContentType.IRON
-						or Cells[x][y + 1].content.name == DEFAULT_CONTENT_NAME
-					then
-						Cells[x][y + 1].content.name = ContentType.IRON
-						Cells[x][y + 1].content.amount = Cells[x][y + 1].content.amount + 1
-					end
+				if
+					Cells[x][y + 1].content.name == cell.under.content.name
+					or Cells[x][y + 1].content.name == DEFAULT_CONTENT_NAME
+				then
+					Cells[x][y + 1].content.name = cell.under.content.name
+					Cells[x][y + 1].content.amount = Cells[x][y + 1].content.amount + 1
 				end
 			elseif type == CellType.CONVEYOR then
-				if cell.content.amount == 0 then
+				if cell.content.amount <= 0 then
 					Cells[x][y].content.name = DEFAULT_CONTENT_NAME
 					goto continue
 				end
@@ -98,26 +106,51 @@ function love.update(dt)
 					offset.y = -1
 				end
 
-				if Cells[x + offset.x] then
-					if not Cells[x + offset.x][y + offset.y] then
-						goto continue
-					end
-				else
+				if
+					x + offset.x > cellAmount
+					or y + offset.y > cellAmount
+					or Cells[x + offset.x][y + offset.y].type ~= CellType.CONVEYOR
+				then
 					goto continue
 				end
 
 				if
-					Cells[x + offset.x][y + offset.y].type == CellType.CONVEYOR
-					and (
-						Cells[x + offset.x][y + offset.y].content.name == cell.content.name
-						or Cells[x + offset.x][y + offset.y].content.name == DEFAULT_CONTENT_NAME
-					)
+					Cells[x + offset.x][y + offset.y].content.name == cell.content.name
+					or Cells[x + offset.x][y + offset.y].content.name == DEFAULT_CONTENT_NAME
 				then
 					Cells[x + offset.x][y + offset.y].content.name = cell.content.name
 					Cells[x + offset.x][y + offset.y].content.amount = Cells[x + offset.x][y + offset.y].content.amount
 						+ cell.content.amount
 					Cells[x][y].content.amount = DEFAULT_CONTENT_NAME
 					Cells[x][y].content.amount = 0
+				end
+			elseif type == CellType.JUNCTION then
+				if y + 1 > cellAmount or y - 1 < 0 then
+					goto continue
+				end
+				if
+					(Cells[x][y + 1].type == CellType.CONVEYOR)
+					and (Cells[x][y - 1].type == CellType.CONVEYOR and Cells[x][y - 1].direction == 1)
+					and (Cells[x][y - 1].content.name == Cells[x][y + 1].content.name or Cells[x][y + 1].content.name == DEFAULT_CONTENT_NAME)
+					and (Cells[x][y - 1].content.amount > 0)
+				then
+					Cells[x][y - 1].content.amount = Cells[x][y - 1].content.amount - 1
+					Cells[x][y + 1].content.amount = Cells[x][y + 1].content.amount + 1
+					Cells[x][y + 1].content.name = Cells[x][y - 1].content.name
+				end
+
+				if x + 1 > cellAmount or x - 1 < 0 then
+					goto continue
+				end
+				if
+					(Cells[x + 1][y].type == CellType.CONVEYOR)
+					and (Cells[x - 1][y].type == CellType.CONVEYOR and Cells[x][y - 1].direction == 0)
+					and (Cells[x - 1][y].content.name == Cells[x - 1][y].content.name or Cells[x + 1][y].content.name == DEFAULT_CONTENT_NAME)
+					and (Cells[x - 1][y].content.amount > 0)
+				then
+					Cells[x - 1][y].content.amount = Cells[x - 1][y].content.amount - 1
+					Cells[x + 1][y].content.amount = Cells[x + 1][y].content.amount + 1
+					Cells[x + 1][y].content.name = Cells[x - 1][y].content.name
 				end
 			end
 			::continue::
@@ -127,6 +160,7 @@ end
 
 local spacing = love.graphics.getWidth() / cellAmount
 
+---@diagnostic disable-next-line: duplicate-set-field
 function love.draw()
 	love.graphics.setFont(Font)
 
@@ -157,37 +191,11 @@ function love.draw()
 	spacing = love.graphics.getWidth() / cellAmount
 	for x, _ in pairs(Cells) do
 		for y, cell in pairs(Cells[x]) do
-			local type = cell.type
-			local image
-
-			love.graphics.setColor(1, 1, 1)
-
-			if type == CellType.CONVEYOR then
-				image = Images.conveyor
-			elseif type == CellType.GENERATOR then
-				image = Images.generator
+			if cell.under then
+				drawCell(x, y, cell.under)
 			end
 
-			if image then
-				local offsetX = 0
-				local offsetY = 0
-				if cell.direction == 1 then
-					offsetX = spacing
-				elseif cell.direction == 2 then
-					offsetX = spacing
-					offsetY = spacing
-				elseif cell.direction == 3 then
-					offsetY = spacing
-				end
-				love.graphics.draw(
-					image,
-					(x - 1) * spacing + offsetX,
-					(y - 1) * spacing + offsetY,
-					cell.direction * math.pi / 2,
-					spacing / 128,
-					spacing / 128
-				)
-			end
+			drawCell(x, y, cell)
 
 			love.graphics.setColor(0.5, 0.5, 0.5)
 			love.graphics.print(
@@ -215,6 +223,7 @@ function love.draw()
 	)
 end
 
+---@diagnostic disable-next-line: duplicate-set-field
 function love.mousepressed(x, y, button)
 	local a = math.ceil(x / spacing)
 	local b = math.ceil(y / spacing)
@@ -223,25 +232,34 @@ function love.mousepressed(x, y, button)
 		return
 	end
 
-	if not Cells[a][b] then
-		return
-	end
-
 	print(("Mouse %d: %d, %d"):format(button, a, b))
+
+	local under = Cell:new(Cells[a][b].type, nil, Content:new(Cells[a][b].content.name, Cells[a][b].content.amount)) -- Cells[a][b].content
+	local iserase = false
 
 	if button == 1 then
 		Cells[a][b].type = CellType.GENERATOR
 	elseif button == 2 then
+		Cells[a][b].content.name = DEFAULT_CONTENT_NAME
 		Cells[a][b].type = CellType.CONVEYOR
+	elseif button == 4 then
+		Cells[a][b].content.name = DEFAULT_CONTENT_NAME
+		Cells[a][b].type = CellType.JUNCTION
 	elseif button == 3 then
-		Cells[a][b].type = 0
+		if Cells[a][b].type ~= CellType.ORE then
+			Cells[a][b].type = CellType.NONE
+		end
+		iserase = true
 	end
 
 	Cells[a][b].direction = rotation
-	Cells[a][b].content.name = DEFAULT_CONTENT_NAME
+	if not iserase and not Cells[a][b].under then
+		Cells[a][b].under = under
+	end
 	Cells[a][b].content.amount = 0
 end
 
+---@diagnostic disable-next-line: duplicate-set-field
 function love.keypressed(key)
 	if key == "space" then
 		dumpMap()
@@ -259,5 +277,50 @@ function love.keypressed(key)
 				rotation = rotation + 1
 			end
 		end
+	end
+end
+
+---@param x integer
+---@param y integer
+---@param cell Cell
+function drawCell(x, y, cell)
+	local image
+	local type = cell.type
+
+	love.graphics.setColor(1, 1, 1)
+
+	if type == CellType.CONVEYOR then
+		image = Images.conveyor
+	elseif type == CellType.JUNCTION then
+		image = Images.junction
+	elseif type == CellType.GENERATOR then
+		image = Images.generator
+	elseif type == CellType.ORE then
+		if cell.content.name == ContentType.IRON then
+			image = Images.ore_iron
+		elseif cell.content.name == ContentType.GOLD then
+			image = Images.ore_gold
+		end
+	end
+
+	if image then
+		local offsetX = 0
+		local offsetY = 0
+		if cell.direction == 1 then
+			offsetX = spacing
+		elseif cell.direction == 2 then
+			offsetX = spacing
+			offsetY = spacing
+		elseif cell.direction == 3 then
+			offsetY = spacing
+		end
+		love.graphics.draw(
+			image,
+			(x - 1) * spacing + offsetX,
+			(y - 1) * spacing + offsetY,
+			cell.direction * math.pi / 2,
+			spacing / 128,
+			spacing / 128
+		)
 	end
 end
