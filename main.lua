@@ -128,6 +128,10 @@ function love.update(dt)
 					offset.y = -1
 				end
 
+				if x + offset.x <= 0 or x + offset.x > cellAmount or y + offset.y <= 0 or y + offset.y > cellAmount then
+					goto continue
+				end
+
 				if
 					x + offset.x > cellAmount
 					or y + offset.y > cellAmount
@@ -186,6 +190,22 @@ local spacing = 64
 ---@param y integer
 ---@param cell Cell
 local function drawCell(x, y, cell)
+	-- local camX = cameraX - love.graphics.getWidth() / 2
+	-- local camY = cameraY + love.graphics.getHeight() / 2
+
+	-- if x >= cameraX + love.graphics.getWidth() / 2 then
+	-- 	return
+	-- end
+	-- if x + spacing <= camX then
+	-- 	return
+	-- end
+	-- if y + spacing <= camY then
+	-- 	return
+	-- end
+	-- if y >= cameraY - love.graphics.getHeight() / 2 then
+	-- 	return
+	-- end
+
 	local image
 	local type = cell.type
 
