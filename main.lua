@@ -274,7 +274,7 @@ local function drawCell(x, y, cell)
 			image,
 			(x - 1) * spacing + offsetX,
 			(y - 1) * spacing + offsetY,
-			cell.direction * math.pi / 2,
+			cell.direction * math.rad(90),
 			spacing / 128,
 			spacing / 128
 		)
