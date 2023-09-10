@@ -11,8 +11,11 @@ Rotation = Direction.RIGHT
 ---@type CellType
 BuildSelection = CellType.NONE
 
+---@type ImageButton
 local generatorButton = nil
+---@type ImageButton
 local conveyorButton = nil
+---@type ImageButton
 local junctionButton = nil
 
 local function dumpMap()
