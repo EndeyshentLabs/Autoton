@@ -3,7 +3,7 @@ require("cell")
 local camera = require("lib.hump.camera")
 
 local cellAmount = 20
-local rotation = 0
+Rotation = 0
 
 local function dumpMap()
 	for x, _ in pairs(Cells) do
@@ -20,6 +20,7 @@ local function generateMap()
 
 	for x = 1, cellAmount do
 		oreGrid[x] = {}
+
 		for y = 1, cellAmount do
 			oreGrid[x][y] = love.math.noise(baseX + 0.1 * x, baseY + 0.1 * y)
 		end
@@ -34,6 +35,7 @@ local function generateMap()
 
 			if oreGrid[x][y] > 0.5 then
 				type = CellType.ORE
+
 				if love.math.random(1, 2) == 1 then
 					contentName = ContentType.IRON
 				else
@@ -55,9 +57,7 @@ function love.load()
 	end
 
 	Camera = camera()
-
 	Cells = {}
-
 	Font = love.graphics.newFont("res/fonts/fira.ttf", 15)
 
 	Images = {}
@@ -78,12 +78,14 @@ local time = 1
 
 ---@diagnostic disable-next-line: duplicate-set-field
 function love.update(dt)
-	local secondPassed = false
 	time = time - dt
 
+	local secondPassed = false
+
 	if time <= 0 then
-		print("Second passed")
 		secondPassed = true
+
+		print("Second passed")
 
 		local leftover = math.abs(time)
 		time = 1 - leftover
@@ -258,6 +260,7 @@ local function drawCell(x, y, cell)
 	if image then
 		local offsetX = 0
 		local offsetY = 0
+
 		if cell.direction == 1 then
 			offsetX = spacing
 		elseif cell.direction == 2 then
@@ -266,6 +269,7 @@ local function drawCell(x, y, cell)
 		elseif cell.direction == 3 then
 			offsetY = spacing
 		end
+
 		love.graphics.draw(
 			image,
 			(x - 1) * spacing + offsetX,
@@ -279,28 +283,31 @@ end
 
 ---@diagnostic disable-next-line: duplicate-set-field
 function love.draw()
-	Camera:attach()
 	love.graphics.setFont(Font)
+
+	Camera:attach()
 
 	local a = math.ceil((love.mouse.getX() - (love.graphics.getWidth() / 2) + cameraX) / spacing)
 	local b = math.ceil((love.mouse.getY() - (love.graphics.getHeight() / 2) + cameraY) / spacing)
 
 	local previewOffsetX = 0
 	local previewOffsetY = 0
-	if rotation == 1 then
+
+	if Rotation == 1 then
 		previewOffsetX = spacing
-	elseif rotation == 2 then
+	elseif Rotation == 2 then
 		previewOffsetX = spacing
 		previewOffsetY = spacing
-	elseif rotation == 3 then
+	elseif Rotation == 3 then
 		previewOffsetY = spacing
 	end
+
 	love.graphics.setColor(1, 1, 1, 0.5)
 	love.graphics.draw(
 		Images.conveyor,
 		(a - 1) * spacing + previewOffsetX,
 		(b - 1) * spacing + previewOffsetY,
-		rotation * math.pi / 2,
+		Rotation * math.pi / 2,
 		spacing / 128,
 		spacing / 128
 	)
@@ -332,7 +339,7 @@ function love.draw()
 	love.graphics.setColor(1, 0, 0)
 	printShadow(
 		"LMB - Place generator\nRMB - Place conveyor\nMMB - Destroy\nR - rotate (current: "
-			.. rotation
+			.. Rotation
 			.. ")\nL_SHIFT + R - Reverse rotate",
 		0,
 		0,
@@ -370,10 +377,11 @@ function love.mousepressed(mouseX, mouseY, button)
 		if Cells[a][b].type ~= CellType.ORE then
 			Cells[a][b].type = CellType.NONE
 		end
+
 		iserase = true
 	end
 
-	Cells[a][b].direction = rotation
+	Cells[a][b].direction = Rotation
 	if not iserase and not Cells[a][b].under then
 		Cells[a][b].under = under
 	end
@@ -386,16 +394,16 @@ function love.keypressed(key)
 		dumpMap()
 	elseif key == "r" then
 		if love.keyboard.isDown("lshift") then
-			if rotation == 0 then
-				rotation = 3
+			if Rotation == 0 then
+				Rotation = 3
 			else
-				rotation = rotation - 1
+				Rotation = Rotation - 1
 			end
 		else
-			if rotation == 3 then
-				rotation = 0
+			if Rotation == 3 then
+				Rotation = 0
 			else
-				rotation = rotation + 1
+				Rotation = Rotation + 1
 			end
 		end
 	end
