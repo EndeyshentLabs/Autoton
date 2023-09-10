@@ -204,7 +204,7 @@ function love.update(dt)
 				end
 				if
 					(Cells[x + 1][y].type == CellType.CONVEYOR)
-					and (Cells[x - 1][y].type == CellType.CONVEYOR and Cells[x][y - 1].direction == Direction.right)
+					and (Cells[x - 1][y].type == CellType.CONVEYOR and Cells[x - 1][y].direction == Direction.RIGHT)
 					and (Cells[x - 1][y].content.name == Cells[x - 1][y].content.name or Cells[x + 1][y].content.name == DEFAULT_CONTENT_NAME)
 					and (Cells[x - 1][y].content.amount > 0)
 				then
