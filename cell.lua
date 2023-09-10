@@ -48,9 +48,17 @@ function CellType.tostring(cellType)
 	end
 end
 
+---@enum Direction
+Direction = {
+	RIGHT = 0,
+	DOWN = 1,
+	LEFT = 2,
+	UP = 3,
+}
+
 ---@class Cell
 ---@field type CellType
----@field direction integer
+---@field direction Direction
 ---@field content Content
 ---@field under Cell|nil
 Cell = {}

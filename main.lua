@@ -3,7 +3,9 @@ require("cell")
 local camera = require("lib.hump.camera")
 
 local cellAmount = 20
-Rotation = 0
+
+---@type Direction
+Rotation = Direction.RIGHT
 
 local function dumpMap()
 	for x, _ in pairs(Cells) do
@@ -135,13 +137,13 @@ function love.update(dt)
 
 				local offset = { ["x"] = 0, ["y"] = 0 }
 
-				if cell.direction == 0 then
+				if cell.direction == Direction.RIGHT then
 					offset.x = 1
-				elseif cell.direction == 1 then
+				elseif cell.direction == Direction.DOWN then
 					offset.y = 1
-				elseif cell.direction == 2 then
+				elseif cell.direction == Direction.LEFT then
 					offset.x = -1
-				elseif cell.direction == 3 then
+				elseif cell.direction == Direction.UP then
 					offset.y = -1
 				end
 
@@ -188,7 +190,7 @@ function love.update(dt)
 				end
 				if
 					(Cells[x][y + 1].type == CellType.CONVEYOR)
-					and (Cells[x][y - 1].type == CellType.CONVEYOR and Cells[x][y - 1].direction == 1)
+					and (Cells[x][y - 1].type == CellType.CONVEYOR and Cells[x][y - 1].direction == Direction.DOWN)
 					and (Cells[x][y - 1].content.name == Cells[x][y + 1].content.name or Cells[x][y + 1].content.name == DEFAULT_CONTENT_NAME)
 					and (Cells[x][y - 1].content.amount > 0)
 				then
@@ -202,7 +204,7 @@ function love.update(dt)
 				end
 				if
 					(Cells[x + 1][y].type == CellType.CONVEYOR)
-					and (Cells[x - 1][y].type == CellType.CONVEYOR and Cells[x][y - 1].direction == 0)
+					and (Cells[x - 1][y].type == CellType.CONVEYOR and Cells[x][y - 1].direction == Direction.right)
 					and (Cells[x - 1][y].content.name == Cells[x - 1][y].content.name or Cells[x + 1][y].content.name == DEFAULT_CONTENT_NAME)
 					and (Cells[x - 1][y].content.amount > 0)
 				then
@@ -261,12 +263,12 @@ local function drawCell(x, y, cell)
 		local offsetX = 0
 		local offsetY = 0
 
-		if cell.direction == 1 then
+		if cell.direction == Direction.DOWN then
 			offsetX = spacing
-		elseif cell.direction == 2 then
+		elseif cell.direction == Direction.LEFT then
 			offsetX = spacing
 			offsetY = spacing
-		elseif cell.direction == 3 then
+		elseif cell.direction == Direction.UP then
 			offsetY = spacing
 		end
 
