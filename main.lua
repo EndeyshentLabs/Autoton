@@ -1,11 +1,18 @@
 require("utils")
 require("cell")
+require("ui")
 local camera = require("lib.hump.camera")
 
 local cellAmount = 20
 
 ---@type Direction
 Rotation = Direction.RIGHT
+---@type CellType
+BuildSelection = CellType.NONE
+
+local generatorButton = nil
+local conveyorButton = nil
+local junctionButton = nil
 
 local function dumpMap()
 	for x, _ in pairs(Cells) do
@@ -68,6 +75,16 @@ function love.load()
 	Images.generator = love.graphics.newImage("res/gfx/generator.png")
 	Images.ore_iron = love.graphics.newImage("res/gfx/ore-iron.png")
 	Images.ore_gold = love.graphics.newImage("res/gfx/ore-gold.png")
+
+	generatorButton = ImageButton:new(48 * 0, 0, 48, 48, Images.generator, function()
+		BuildSelection = CellType.GENERATOR
+	end)
+	conveyorButton = ImageButton:new(48 * 1, 0, 48, 48, Images.conveyor, function()
+		BuildSelection = CellType.CONVEYOR
+	end)
+	junctionButton = ImageButton:new(48 * 2, 0, 48, 48, Images.junction, function()
+		BuildSelection = CellType.JUNCTION
+	end)
 
 	generateMap()
 	dumpMap()
@@ -339,48 +356,63 @@ function love.draw()
 	Camera:detach()
 
 	love.graphics.setColor(1, 0, 0)
-	printShadow(
-		"LMB - Place generator\nRMB - Place conveyor\nMMB - Destroy\nR - rotate (current: "
-			.. Rotation
-			.. ")\nL_SHIFT + R - Reverse rotate",
-		0,
-		0,
-		1,
-		0,
-		0
-	)
+	generatorButton:draw()
+	conveyorButton:draw()
+	junctionButton:draw()
+
+	local currentButton = nil
+	if BuildSelection == CellType.GENERATOR then
+		currentButton = generatorButton
+	elseif BuildSelection == CellType.CONVEYOR then
+		currentButton = conveyorButton
+	elseif BuildSelection == CellType.JUNCTION then
+		currentButton = junctionButton
+	end
+
+	if currentButton then
+		love.graphics.setColor(0, 1, 0)
+		love.graphics.rectangle("line", currentButton.x, currentButton.y, currentButton.w, currentButton.h)
+	end
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
 function love.mousepressed(mouseX, mouseY, button)
+	generatorButton:update()
+	conveyorButton:update()
+	junctionButton:update()
+
+	if button > 2 then
+		return
+	end
+
 	local x = mouseX - love.graphics.getWidth() / 2 + cameraX
 	local y = mouseY - love.graphics.getHeight() / 2 + cameraY
 	local a = math.ceil(x / spacing)
 	local b = math.ceil(y / spacing)
 
-	if a > cellAmount or b > cellAmount or a <= 0 or b <= 0 then
+	if a > cellAmount or b > cellAmount or a <= 0 or b <= 0 or mouseY <= 48 then
 		return
 	end
 
 	print(("Mouse %d: %d, %d"):format(button, a, b))
 
-	local under = Cell:new(Cells[a][b].type, nil, Content:new(Cells[a][b].content.name, Cells[a][b].content.amount)) -- Cells[a][b].content
-	local iserase = false
+	local under = Cell:new(Cells[a][b].type, nil, Content:new(Cells[a][b].content.name, Cells[a][b].content.amount))
+	local iserase = button == 2
 
-	if button == 1 then
-		Cells[a][b].type = CellType.GENERATOR
-	elseif button == 2 then
-		Cells[a][b].content.name = DEFAULT_CONTENT_NAME
-		Cells[a][b].type = CellType.CONVEYOR
-	elseif button == 4 then
-		Cells[a][b].content.name = DEFAULT_CONTENT_NAME
-		Cells[a][b].type = CellType.JUNCTION
-	elseif button == 3 then
-		if Cells[a][b].type ~= CellType.ORE then
-			Cells[a][b].type = CellType.NONE
+	if not iserase then
+		if BuildSelection == CellType.GENERATOR then
+			Cells[a][b].type = CellType.GENERATOR
+		elseif BuildSelection == CellType.CONVEYOR then
+			Cells[a][b].content.name = DEFAULT_CONTENT_NAME
+			Cells[a][b].type = CellType.CONVEYOR
+		elseif BuildSelection == CellType.JUNCTION then
+			Cells[a][b].content.name = DEFAULT_CONTENT_NAME
+			Cells[a][b].type = CellType.JUNCTION
 		end
+	end
 
-		iserase = true
+	if iserase and Cells[a][b].type ~= CellType.ORE then
+		Cells[a][b].type = CellType.NONE
 	end
 
 	Cells[a][b].direction = Rotation
@@ -408,5 +440,11 @@ function love.keypressed(key)
 				Rotation = Rotation + 1
 			end
 		end
+	elseif key == "1" then
+		BuildSelection = CellType.GENERATOR
+	elseif key == "2" then
+		BuildSelection = CellType.CONVEYOR
+	elseif key == "3" then
+		BuildSelection = CellType.JUNCTION
 	end
 end
