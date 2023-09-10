@@ -1,6 +1,6 @@
----@diagnostic disable: unused-local
 require("utils")
 require("cell")
+local camera = require("lib.hump.camera")
 
 local cellAmount = 20
 local rotation = 0
@@ -46,12 +46,15 @@ local function generateMap()
 	end
 end
 
+---@diagnostic disable-next-line: duplicate-set-field
 function love.load()
 	if isDebug() then
 		---@diagnostic disable-next-line: lowercase-global
 		vudu = require("lib.vudu.vudu")
 		vudu:initialize()
 	end
+
+	Camera = camera()
 
 	Cells = {}
 
@@ -68,8 +71,24 @@ function love.load()
 	dumpMap()
 end
 
+local cameraX = 0
+local cameraY = 0
+
 ---@diagnostic disable-next-line: duplicate-set-field
 function love.update(dt)
+	if love.keyboard.isDown("w") then
+		cameraY = cameraY - 300 * dt
+	elseif love.keyboard.isDown("s") then
+		cameraY = cameraY + 300 * dt
+	end
+	if love.keyboard.isDown("a") then
+		cameraX = cameraX - 300 * dt
+	elseif love.keyboard.isDown("d") then
+		cameraX = cameraX + 300 * dt
+	end
+
+	Camera:lookAt(cameraX, cameraY)
+
 	for x, _ in pairs(Cells) do
 		for y, cell in pairs(Cells[x]) do
 			local type = cell.type
@@ -161,7 +180,7 @@ function love.update(dt)
 	end
 end
 
-local spacing = love.graphics.getWidth() / cellAmount
+local spacing = 64
 
 ---@param x integer
 ---@param y integer
@@ -210,10 +229,11 @@ end
 
 ---@diagnostic disable-next-line: duplicate-set-field
 function love.draw()
+	Camera:attach()
 	love.graphics.setFont(Font)
 
-	local a = math.ceil(love.mouse.getX() / spacing)
-	local b = math.ceil(love.mouse.getY() / spacing)
+	local a = math.ceil((love.mouse.getX() - (love.graphics.getWidth() / 2) + cameraX) / spacing)
+	local b = math.ceil((love.mouse.getY() - (love.graphics.getHeight() / 2) + cameraY) / spacing)
 
 	local previewOffsetX = 0
 	local previewOffsetY = 0
@@ -236,7 +256,6 @@ function love.draw()
 	)
 
 	-- Draw grid
-	spacing = love.graphics.getWidth() / cellAmount
 	for x, _ in pairs(Cells) do
 		for y, cell in pairs(Cells[x]) do
 			if cell.under then
@@ -258,6 +277,8 @@ function love.draw()
 		end
 	end
 
+	Camera:detach()
+
 	love.graphics.setColor(1, 0, 0)
 	printShadow(
 		"LMB - Place generator\nRMB - Place conveyor\nMMB - Destroy\nR - rotate (current: "
@@ -272,11 +293,13 @@ function love.draw()
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
-function love.mousepressed(x, y, button)
+function love.mousepressed(mouseX, mouseY, button)
+	local x = mouseX - love.graphics.getWidth() / 2 + cameraX
+	local y = mouseY - love.graphics.getHeight() / 2 + cameraY
 	local a = math.ceil(x / spacing)
 	local b = math.ceil(y / spacing)
 
-	if a > cellAmount or b > cellAmount then
+	if a > cellAmount or b > cellAmount or a <= 0 or b <= 0 then
 		return
 	end
 
