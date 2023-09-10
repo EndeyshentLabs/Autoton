@@ -74,8 +74,21 @@ end
 local cameraX = 0
 local cameraY = 0
 
+local time = 1
+
 ---@diagnostic disable-next-line: duplicate-set-field
 function love.update(dt)
+	local secondPassed = false
+	time = time - dt
+
+	if time <= 0 then
+		print("Second passed")
+		secondPassed = true
+
+		local leftover = math.abs(time)
+		time = 1 - leftover
+	end
+
 	if love.keyboard.isDown("w") then
 		cameraY = cameraY - 300 * dt
 	elseif love.keyboard.isDown("s") then
@@ -104,8 +117,10 @@ function love.update(dt)
 				end
 
 				if
-					Cells[x][y + 1].content.name == cell.under.content.name
-					or Cells[x][y + 1].content.name == DEFAULT_CONTENT_NAME
+					(
+						Cells[x][y + 1].content.name == cell.under.content.name
+						or Cells[x][y + 1].content.name == DEFAULT_CONTENT_NAME
+					) and secondPassed
 				then
 					Cells[x][y + 1].content.name = cell.under.content.name
 					Cells[x][y + 1].content.amount = Cells[x][y + 1].content.amount + 1
@@ -136,19 +151,34 @@ function love.update(dt)
 					x + offset.x > cellAmount
 					or y + offset.y > cellAmount
 					or Cells[x + offset.x][y + offset.y].type ~= CellType.CONVEYOR
+					or Cells[x][y].content.amount == 0
 				then
 					goto continue
 				end
 
 				if
-					Cells[x + offset.x][y + offset.y].content.name == cell.content.name
-					or Cells[x + offset.x][y + offset.y].content.name == DEFAULT_CONTENT_NAME
+					(
+						Cells[x + offset.x][y + offset.y].content.name == cell.content.name
+						or Cells[x + offset.x][y + offset.y].content.name == DEFAULT_CONTENT_NAME
+					) and secondPassed
 				then
+					local sub = 3
 					Cells[x + offset.x][y + offset.y].content.name = cell.content.name
+
+					if Cells[x][y].content.amount < 3 then
+						sub = Cells[x][y].content.amount
+					end
+
+					assert(sub <= 3 and sub > 0, "0 < sub <= 3 (current " .. sub .. ")")
+
 					Cells[x + offset.x][y + offset.y].content.amount = Cells[x + offset.x][y + offset.y].content.amount
-						+ cell.content.amount
-					Cells[x][y].content.amount = DEFAULT_CONTENT_NAME
-					Cells[x][y].content.amount = 0
+						+ sub
+
+					Cells[x][y].content.amount = Cells[x][y].content.amount - sub
+
+					if Cells[x][y].content.amount == 0 then
+						Cells[x][y].content.name = DEFAULT_CONTENT_NAME
+					end
 				end
 			elseif type == CellType.JUNCTION then
 				if y + 1 > cellAmount or y - 1 < 0 then
