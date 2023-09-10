@@ -1,3 +1,4 @@
+---@diagnostic disable: need-check-nil
 require("utils")
 require("cell")
 require("ui")
