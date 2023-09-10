@@ -190,21 +190,21 @@ local spacing = 64
 ---@param y integer
 ---@param cell Cell
 local function drawCell(x, y, cell)
-	-- local camX = cameraX - love.graphics.getWidth() / 2
-	-- local camY = cameraY + love.graphics.getHeight() / 2
+	local camX = cameraX - love.graphics.getWidth() / 2
+	local camY = cameraY - love.graphics.getHeight() / 2
 
-	-- if x >= cameraX + love.graphics.getWidth() / 2 then
-	-- 	return
-	-- end
-	-- if x + spacing <= camX then
-	-- 	return
-	-- end
-	-- if y + spacing <= camY then
-	-- 	return
-	-- end
-	-- if y >= cameraY - love.graphics.getHeight() / 2 then
-	-- 	return
-	-- end
+	if x * spacing - spacing >= cameraX + love.graphics.getWidth() / 2 then
+		return
+	end
+	if x * spacing <= camX then
+		return
+	end
+	if y * spacing - spacing >= cameraY + love.graphics.getHeight() / 2 then
+		return
+	end
+	if y * spacing <= camY then
+		return
+	end
 
 	local image
 	local type = cell.type
