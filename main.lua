@@ -241,6 +241,29 @@ end
 
 local spacing = 64
 
+---Returns cell's sprite based on it's type
+---@param cell Cell
+---@return love.Image|nil
+local function imageFromCell(cell)
+	local type = cell.type
+
+	if type == CellType.CONVEYOR then
+		return Images.conveyor
+	elseif type == CellType.JUNCTION then
+		return Images.junction
+	elseif type == CellType.GENERATOR then
+		return Images.generator
+	elseif type == CellType.ORE then
+		if cell.content.name == ContentType.IRON then
+			return Images.ore_iron
+		elseif cell.content.name == ContentType.GOLD then
+			return Images.ore_gold
+		end
+	end
+
+	return nil
+end
+
 ---@param x integer
 ---@param y integer
 ---@param cell Cell
@@ -261,24 +284,7 @@ local function drawCell(x, y, cell)
 		return
 	end
 
-	local image
-	local type = cell.type
-
-	love.graphics.setColor(1, 1, 1)
-
-	if type == CellType.CONVEYOR then
-		image = Images.conveyor
-	elseif type == CellType.JUNCTION then
-		image = Images.junction
-	elseif type == CellType.GENERATOR then
-		image = Images.generator
-	elseif type == CellType.ORE then
-		if cell.content.name == ContentType.IRON then
-			image = Images.ore_iron
-		elseif cell.content.name == ContentType.GOLD then
-			image = Images.ore_gold
-		end
-	end
+	local image = imageFromCell(cell)
 
 	if image then
 		local offsetX = 0
@@ -293,6 +299,7 @@ local function drawCell(x, y, cell)
 			offsetY = spacing
 		end
 
+		love.graphics.setColor(1, 1, 1)
 		love.graphics.draw(
 			image,
 			(x - 1) * spacing + offsetX,
@@ -313,27 +320,31 @@ function love.draw()
 	local a = math.ceil((love.mouse.getX() - (love.graphics.getWidth() / 2) + cameraX) / spacing)
 	local b = math.ceil((love.mouse.getY() - (love.graphics.getHeight() / 2) + cameraY) / spacing)
 
-	local previewOffsetX = 0
-	local previewOffsetY = 0
+	local previewImage = imageFromCell(Cell:new(BuildSelection))
 
-	if Rotation == 1 then
-		previewOffsetX = spacing
-	elseif Rotation == 2 then
-		previewOffsetX = spacing
-		previewOffsetY = spacing
-	elseif Rotation == 3 then
-		previewOffsetY = spacing
+	if previewImage then
+		local previewOffsetX = 0
+		local previewOffsetY = 0
+
+		if Rotation == 1 then
+			previewOffsetX = spacing
+		elseif Rotation == 2 then
+			previewOffsetX = spacing
+			previewOffsetY = spacing
+		elseif Rotation == 3 then
+			previewOffsetY = spacing
+		end
+
+		love.graphics.setColor(1, 1, 1, 0.5)
+		love.graphics.draw(
+			previewImage,
+			(a - 1) * spacing + previewOffsetX,
+			(b - 1) * spacing + previewOffsetY,
+			Rotation * math.rad(90),
+			spacing / 128,
+			spacing / 128
+		)
 	end
-
-	love.graphics.setColor(1, 1, 1, 0.5)
-	love.graphics.draw(
-		Images.conveyor,
-		(a - 1) * spacing + previewOffsetX,
-		(b - 1) * spacing + previewOffsetY,
-		Rotation * math.pi / 2,
-		spacing / 128,
-		spacing / 128
-	)
 
 	-- Draw grid
 	for x, _ in pairs(Cells) do
