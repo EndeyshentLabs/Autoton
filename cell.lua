@@ -159,8 +159,8 @@ function Cell:new(x, y, type, direction, content, under)
 	function public:update(dt, secondPassed)
 		if self.type == CellType.GENERATOR then
 			if
-				y + 1 > CellAmount
-				or Cells[x][y + 1].type ~= CellType.CONVEYOR
+				self.y + 1 > CellAmount
+				or Cells[self.x][self.y + 1].type ~= CellType.CONVEYOR
 				or not self.under
 				or self.under.content.name == DEFAULT_CONTENT_NAME
 			then
@@ -169,12 +169,12 @@ function Cell:new(x, y, type, direction, content, under)
 
 			if
 				(
-					Cells[x][y + 1].content.name == self.under.content.name
-					or Cells[x][y + 1].content.name == DEFAULT_CONTENT_NAME
+					Cells[self.x][self.y + 1].content.name == self.under.content.name
+					or Cells[self.x][self.y + 1].content.name == DEFAULT_CONTENT_NAME
 				) and secondPassed
 			then
-				Cells[x][y + 1].content.name = self.under.content.name
-				Cells[x][y + 1].content.amount = Cells[x][y + 1].content.amount + 1
+				Cells[self.x][self.y + 1].content.name = self.under.content.name
+				Cells[self.x][self.y + 1].content.amount = Cells[self.x][self.y + 1].content.amount + 1
 			end
 		elseif self.type == CellType.CONVEYOR then
 			if self.content.amount <= 0 then
@@ -194,14 +194,19 @@ function Cell:new(x, y, type, direction, content, under)
 				offset.y = -1
 			end
 
-			if x + offset.x <= 0 or x + offset.x > CellAmount or y + offset.y <= 0 or y + offset.y > CellAmount then
+			if
+				self.x + offset.x <= 0
+				or self.x + offset.x > CellAmount
+				or self.y + offset.y <= 0
+				or self.y + offset.y > CellAmount
+			then
 				return
 			end
 
 			if
-				x + offset.x > CellAmount
-				or y + offset.y > CellAmount
-				or Cells[x + offset.x][y + offset.y].type ~= CellType.CONVEYOR
+				self.x + offset.x > CellAmount
+				or self.y + offset.y > CellAmount
+				or Cells[self.x + offset.x][self.y + offset.y].type ~= CellType.CONVEYOR
 				or self.content.amount == 0
 			then
 				return
@@ -209,12 +214,12 @@ function Cell:new(x, y, type, direction, content, under)
 
 			if
 				(
-					Cells[x + offset.x][y + offset.y].content.name == self.content.name
-					or Cells[x + offset.x][y + offset.y].content.name == DEFAULT_CONTENT_NAME
+					Cells[self.x + offset.x][self.y + offset.y].content.name == self.content.name
+					or Cells[self.x + offset.x][self.y + offset.y].content.name == DEFAULT_CONTENT_NAME
 				) and secondPassed
 			then
 				local sub = 3
-				Cells[x + offset.x][y + offset.y].content.name = self.content.name
+				Cells[self.x + offset.x][self.y + offset.y].content.name = self.content.name
 
 				if self.content.amount < 3 then
 					sub = self.content.amount
@@ -222,7 +227,7 @@ function Cell:new(x, y, type, direction, content, under)
 
 				assert(sub <= 3 and sub > 0, "0 < sub <= 3 (current " .. sub .. ")")
 
-				Cells[x + offset.x][y + offset.y].content.amount = Cells[x + offset.x][y + offset.y].content.amount
+				Cells[self.x + offset.x][self.y + offset.y].content.amount = Cells[self.x + offset.x][self.y + offset.y].content.amount
 					+ sub
 
 				self.content.amount = self.content.amount - sub
@@ -232,32 +237,32 @@ function Cell:new(x, y, type, direction, content, under)
 				end
 			end
 		elseif self.type == CellType.JUNCTION then
-			if y + 1 > CellAmount or y - 1 < 0 then
+			if self.y + 1 > CellAmount or self.y - 1 < 0 then
 				return
 			end
 			if
-				(Cells[x][y + 1].type == CellType.CONVEYOR)
-				and (Cells[x][y - 1].type == CellType.CONVEYOR and Cells[x][y - 1].direction == Direction.DOWN)
-				and (Cells[x][y - 1].content.name == Cells[x][y + 1].content.name or Cells[x][y + 1].content.name == DEFAULT_CONTENT_NAME)
-				and (Cells[x][y - 1].content.amount > 0)
+				(Cells[self.x][self.y + 1].type == CellType.CONVEYOR)
+				and (Cells[self.x][self.y - 1].type == CellType.CONVEYOR and Cells[self.x][self.y - 1].direction == Direction.DOWN)
+				and (Cells[self.x][self.y - 1].content.name == Cells[self.x][self.y + 1].content.name or Cells[self.x][self.y + 1].content.name == DEFAULT_CONTENT_NAME)
+				and (Cells[self.x][self.y - 1].content.amount > 0)
 			then
-				Cells[x][y - 1].content.amount = Cells[x][y - 1].content.amount - 1
-				Cells[x][y + 1].content.amount = Cells[x][y + 1].content.amount + 1
-				Cells[x][y + 1].content.name = Cells[x][y - 1].content.name
+				Cells[self.x][self.y - 1].content.amount = Cells[self.x][self.y - 1].content.amount - 1
+				Cells[self.x][self.y + 1].content.amount = Cells[self.x][self.y + 1].content.amount + 1
+				Cells[self.x][self.y + 1].content.name = Cells[self.x][self.y - 1].content.name
 			end
 
-			if x + 1 > CellAmount or x - 1 < 0 then
+			if self.x + 1 > CellAmount or self.x - 1 < 0 then
 				return
 			end
 			if
-				(Cells[x + 1][y].type == CellType.CONVEYOR)
-				and (Cells[x - 1][y].type == CellType.CONVEYOR and Cells[x - 1][y].direction == Direction.RIGHT)
-				and (Cells[x - 1][y].content.name == Cells[x - 1][y].content.name or Cells[x + 1][y].content.name == DEFAULT_CONTENT_NAME)
-				and (Cells[x - 1][y].content.amount > 0)
+				(Cells[self.x + 1][self.y].type == CellType.CONVEYOR)
+				and (Cells[self.x - 1][self.y].type == CellType.CONVEYOR and Cells[self.x - 1][self.y].direction == Direction.RIGHT)
+				and (Cells[self.x - 1][self.y].content.name == Cells[self.x - 1][self.y].content.name or Cells[self.x + 1][self.y].content.name == DEFAULT_CONTENT_NAME)
+				and (Cells[self.x - 1][self.y].content.amount > 0)
 			then
-				Cells[x - 1][y].content.amount = Cells[x - 1][y].content.amount - 1
-				Cells[x + 1][y].content.amount = Cells[x + 1][y].content.amount + 1
-				Cells[x + 1][y].content.name = Cells[x - 1][y].content.name
+				Cells[self.x - 1][self.y].content.amount = Cells[self.x - 1][self.y].content.amount - 1
+				Cells[self.x + 1][self.y].content.amount = Cells[self.x + 1][self.y].content.amount + 1
+				Cells[self.x + 1][self.y].content.name = Cells[self.x - 1][self.y].content.name
 			end
 		end
 	end
