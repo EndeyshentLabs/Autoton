@@ -4,6 +4,7 @@ require("cell")
 require("ui")
 local camera = require("lib.hump.camera")
 
+ShowProgress = true
 CellAmount = 20
 
 ---@type Direction

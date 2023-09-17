@@ -97,15 +97,6 @@ function drawCell(x, y, cell)
 			CellSize / 128
 		)
 	end
-
-	if cell.under then
-		love.graphics.setColor(0.5, 0.5, 0.5)
-		love.graphics.print(
-			("%s\n%d\n%d%%"):format(cell.content.name, cell.content.amount, cell.progress),
-			(x - 1) * CellSize + 1,
-			(y - 1) * CellSize + 1
-		)
-	end
 end
 
 ---@enum CellType
@@ -368,6 +359,23 @@ function Cell:new(x, y, type, direction, content, under)
 		end
 
 		drawCell(self.x, self.y, self)
+
+		love.graphics.setColor(0.5, 0.5, 0.5)
+		love.graphics.print(
+			("%s\n%d\n%d%%"):format(self.content.name, self.content.amount, self.progress),
+			(x - 1) * CellSize + 1,
+			(y - 1) * CellSize + 1
+		)
+
+		if self.progress > 0 and ShowProgress then
+			love.graphics.rectangle(
+				"fill",
+				self.x * CellSize - CellSize,
+				self.y * CellSize - 8,
+				CellSize * self.progress / 100,
+				8
+			)
+		end
 	end
 
 	setmetatable(public, self)
