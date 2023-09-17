@@ -155,8 +155,10 @@ function Cell:new(x, y, type, direction, content, under)
 	public.direction = direction or 0
 	public.content = content or Content:new()
 	public.under = under
+	--- In percents
+	public.progress = 0
 
-	function public:updateGenerator(dt, secondPassed)
+	function public:updateGenerator(dt)
 		if
 			self.y + 1 > CellAmount
 			or Cells[self.x][self.y + 1].type ~= CellType.CONVEYOR
@@ -166,18 +168,27 @@ function Cell:new(x, y, type, direction, content, under)
 			return
 		end
 
+		self.progress = self.progress + dt * 50
+
+		local updated = false
 		if
 			(
 				Cells[self.x][self.y + 1].content.name == self.under.content.name
 				or Cells[self.x][self.y + 1].content.name == DEFAULT_CONTENT_NAME
-			) and secondPassed
+			) and self.progress >= 100
 		then
 			Cells[self.x][self.y + 1].content.name = self.under.content.name
 			Cells[self.x][self.y + 1].content.amount = Cells[self.x][self.y + 1].content.amount + 1
+
+			updated = true
+		end
+
+		if self.progress >= 100 and updated then
+			self.progress = 0
 		end
 	end
 
-	function public:updateConveyor(dt, secondPassed)
+	function public:updateConveyor(dt)
 		if self.content.amount <= 0 then
 			self.content.name = DEFAULT_CONTENT_NAME
 			return
@@ -213,11 +224,14 @@ function Cell:new(x, y, type, direction, content, under)
 			return
 		end
 
+		self.progress = self.progress + dt * 100
+
+		local updated = false
 		if
 			(
 				Cells[self.x + offset.x][self.y + offset.y].content.name == self.content.name
 				or Cells[self.x + offset.x][self.y + offset.y].content.name == DEFAULT_CONTENT_NAME
-			) and secondPassed
+			) and self.progress >= 100
 		then
 			local sub = 3
 			Cells[self.x + offset.x][self.y + offset.y].content.name = self.content.name
@@ -233,14 +247,16 @@ function Cell:new(x, y, type, direction, content, under)
 
 			self.content.amount = self.content.amount - sub
 
-			if self.content.amount == 0 then
-				self.content.name = DEFAULT_CONTENT_NAME
-			end
+			updated = true
+		end
+
+		if self.progress >= 100 and updated then
+			self.progress = 0
 		end
 	end
 
 	---@diagnostic disable-next-line: unused-local
-	function public:updateJunction(dt, secondPassed)
+	function public:updateJunction(dt) -- TODO: Rewrite
 		if self.y + 1 > CellAmount or self.y - 1 < 0 then
 			return
 		end
@@ -270,13 +286,17 @@ function Cell:new(x, y, type, direction, content, under)
 		end
 	end
 
-	function public:update(dt, secondPassed)
+	function public:update(dt)
 		if self.type == CellType.GENERATOR then
-			self:updateGenerator(dt, secondPassed)
+			self:updateGenerator(dt)
 		elseif self.type == CellType.CONVEYOR then
-			self:updateConveyor(dt, secondPassed)
+			self:updateConveyor(dt)
 		elseif self.type == CellType.JUNCTION then
-			self:updateJunction(dt, secondPassed)
+			self:updateJunction(dt)
+		elseif self.type == CellType.ORE or self.type == CellType.NONE then
+			if self.progress ~= 0 then
+				self.progress = 0
+			end
 		end
 	end
 
@@ -289,7 +309,7 @@ function Cell:new(x, y, type, direction, content, under)
 
 		love.graphics.setColor(0.5, 0.5, 0.5)
 		love.graphics.print(
-			self.content.name .. "\n" .. self.content.amount,
+			("%s\n%d\n%d%%"):format(self.content.name, self.content.amount, self.progress),
 			(self.x - 1) * CellSize + 1,
 			(self.y - 1) * CellSize + 1
 		)
