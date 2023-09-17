@@ -18,6 +18,8 @@ local generatorButton = nil
 local conveyorButton = nil
 ---@type ImageButton
 local junctionButton = nil
+---@type ImageButton
+local progressButton = nil
 
 local function dumpMap()
 	for x, _ in pairs(Cells) do
@@ -87,6 +89,7 @@ function love.load()
 	Images.generator = love.graphics.newImage("res/gfx/generator.png")
 	Images.ore_iron = love.graphics.newImage("res/gfx/ore-iron.png")
 	Images.ore_gold = love.graphics.newImage("res/gfx/ore-gold.png")
+	Images.show_progress = love.graphics.newImage("res/gfx/show-progress.png")
 
 	generatorButton = ImageButton:new(48 * 0, 0, 48, 48, Images.generator, function()
 		BuildSelection = CellType.GENERATOR
@@ -96,6 +99,9 @@ function love.load()
 	end)
 	junctionButton = ImageButton:new(48 * 2, 0, 48, 48, Images.junction, function()
 		BuildSelection = CellType.JUNCTION
+	end)
+	progressButton = ImageButton:new(love.graphics.getWidth() - 48, 0, 48, 48, Images.show_progress, function()
+		ShowProgress = not ShowProgress
 	end)
 
 	coroutine.resume(mapGeneratorThread)
@@ -182,6 +188,13 @@ function love.draw()
 	generatorButton:draw()
 	conveyorButton:draw()
 	junctionButton:draw()
+	progressButton:draw()
+	if ShowProgress then
+		love.graphics.setColor(0, 1, 0)
+	else
+		love.graphics.setColor(1, 0, 0)
+	end
+	love.graphics.rectangle("line", progressButton.x, progressButton.y, progressButton.w, progressButton.h)
 
 	local currentButton = nil
 	if BuildSelection == CellType.GENERATOR then
@@ -203,6 +216,7 @@ function love.mousepressed(mouseX, mouseY, button)
 	generatorButton:update()
 	conveyorButton:update()
 	junctionButton:update()
+	progressButton:update()
 
 	if button > 2 then
 		return
@@ -271,4 +285,9 @@ function love.keypressed(key)
 	elseif key == "3" then
 		BuildSelection = CellType.JUNCTION
 	end
+end
+
+---@diagnostic disable-next-line: duplicate-set-field
+function love.resize()
+	progressButton.x = love.graphics.getWidth() - 48
 end
