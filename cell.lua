@@ -134,6 +134,7 @@ Direction = {
 ---@field type CellType
 ---@field direction Direction
 ---@field content Content
+---@field progress number
 ---@field under Cell|nil
 ---@field update function
 ---@field draw function
