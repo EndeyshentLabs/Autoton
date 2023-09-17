@@ -256,33 +256,85 @@ function Cell:new(x, y, type, direction, content, under)
 	end
 
 	---@diagnostic disable-next-line: unused-local
-	function public:updateJunction(dt) -- TODO: Rewrite
-		if self.y + 1 > CellAmount or self.y - 1 < 0 then
-			return
-		end
-		if
-			(Cells[self.x][self.y + 1].type == CellType.CONVEYOR)
-			and (Cells[self.x][self.y - 1].type == CellType.CONVEYOR and Cells[self.x][self.y - 1].direction == Direction.DOWN)
-			and (Cells[self.x][self.y - 1].content.name == Cells[self.x][self.y + 1].content.name or Cells[self.x][self.y + 1].content.name == DEFAULT_CONTENT_NAME)
-			and (Cells[self.x][self.y - 1].content.amount > 0)
-		then
-			Cells[self.x][self.y - 1].content.amount = Cells[self.x][self.y - 1].content.amount - 1
-			Cells[self.x][self.y + 1].content.amount = Cells[self.x][self.y + 1].content.amount + 1
-			Cells[self.x][self.y + 1].content.name = Cells[self.x][self.y - 1].content.name
+	function public:updateJunction(dt)
+		local inputOffset = {}
+		inputOffset.x = 0
+		inputOffset.y = 0
+
+		if self.x - 1 > 0 and self.x + 1 <= CellAmount then
+			if
+				Cells[self.x - 1][self.y].type == CellType.CONVEYOR
+				and Cells[self.x - 1][self.y].direction == Direction.RIGHT
+			then
+				inputOffset.x = -1
+			elseif
+				Cells[self.x + 1][self.y].type == CellType.CONVEYOR
+				and Cells[self.x + 1][self.y].direction == Direction.LEFT
+			then
+				inputOffset.x = 1
+			else
+				goto next
+			end
+
+			if Cells[self.x + inputOffset.x * -1][self.y].type ~= CellType.CONVEYOR then
+				goto next
+			end
+
+			if inputOffset.x ~= 0 then
+				if Cells[self.x + inputOffset.x][self.y].content.name == DEFAULT_CONTENT_NAME then
+					goto next
+				end
+
+				if
+					Cells[self.x + inputOffset.x][self.y].content.name
+						== Cells[self.x + inputOffset.x * -1][self.y].content.name
+					or Cells[self.x + inputOffset.x * -1][self.y].content.name == DEFAULT_CONTENT_NAME
+				then
+					Cells[self.x + inputOffset.x * -1][self.y].content.name =
+						Cells[self.x + inputOffset.x][self.y].content.name
+					Cells[self.x + inputOffset.x * -1][self.y].content.amount = Cells[self.x + inputOffset.x * -1][self.y].content.amount
+						+ Cells[self.x + inputOffset.x][self.y].content.amount
+					Cells[self.x + inputOffset.x][self.y].content.amount = 0
+					Cells[self.x + inputOffset.x][self.y].content.name = DEFAULT_CONTENT_NAME
+				end
+			end
 		end
 
-		if self.x + 1 > CellAmount or self.x - 1 < 0 then
-			return
-		end
-		if
-			(Cells[self.x + 1][self.y].type == CellType.CONVEYOR)
-			and (Cells[self.x - 1][self.y].type == CellType.CONVEYOR and Cells[self.x - 1][self.y].direction == Direction.RIGHT)
-			and (Cells[self.x - 1][self.y].content.name == Cells[self.x - 1][self.y].content.name or Cells[self.x + 1][self.y].content.name == DEFAULT_CONTENT_NAME)
-			and (Cells[self.x - 1][self.y].content.amount > 0)
-		then
-			Cells[self.x - 1][self.y].content.amount = Cells[self.x - 1][self.y].content.amount - 1
-			Cells[self.x + 1][self.y].content.amount = Cells[self.x + 1][self.y].content.amount + 1
-			Cells[self.x + 1][self.y].content.name = Cells[self.x - 1][self.y].content.name
+		::next::
+
+		if self.y - 1 > 0 and self.y + 1 <= CellAmount then
+			if
+				Cells[self.x][self.y - 1].type == CellType.CONVEYOR
+				and Cells[self.x][self.y - 1].direction == Direction.DOWN
+			then
+				inputOffset.y = -1
+			elseif
+				Cells[self.x][self.y + 1].type == CellType.CONVEYOR
+				and Cells[self.x][self.y + 1].direction == Direction.UP
+			then
+				inputOffset.y = 1
+			else
+				return
+			end
+
+			if Cells[self.x][self.y + inputOffset.y * -1].type ~= CellType.CONVEYOR then
+				return
+			end
+
+			if inputOffset.y ~= 0 then
+				if
+					Cells[self.x][self.y + inputOffset.y].content.name
+						== Cells[self.x][self.y + inputOffset.y * -1].content.name
+					or Cells[self.x][self.y + inputOffset.y * -1].content.name == DEFAULT_CONTENT_NAME
+				then
+					Cells[self.x][self.y + inputOffset.y * -1].content.name =
+						Cells[self.x][self.y + inputOffset.y].content.name
+					Cells[self.x][self.y + inputOffset.y * -1].content.amount = Cells[self.x][self.y + inputOffset.y * -1].content.amount
+						+ Cells[self.x][self.y + inputOffset.y].content.amount
+					Cells[self.x][self.y + inputOffset.y].content.amount = 0
+					Cells[self.x][self.y + inputOffset.y].content.name = DEFAULT_CONTENT_NAME
+				end
+			end
 		end
 	end
 
