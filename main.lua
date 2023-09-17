@@ -65,6 +65,10 @@ Camera = nil
 CameraX = 0
 CameraY = 0
 
+local mapReady = false
+
+local mapGeneratorThread = coroutine.create(generateMap)
+
 ---@diagnostic disable-next-line: duplicate-set-field
 function love.load()
 	if isDebug() then
@@ -93,8 +97,10 @@ function love.load()
 		BuildSelection = CellType.JUNCTION
 	end)
 
-	generateMap()
+	coroutine.resume(mapGeneratorThread)
 	dumpMap()
+
+	mapReady = true
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
@@ -112,9 +118,11 @@ function love.update(dt)
 
 	Camera:lookAt(CameraX, CameraY)
 
-	for x, _ in pairs(Cells) do
-		for _, cell in pairs(Cells[x]) do
-			cell:update(dt)
+	if mapReady then
+		for x, _ in pairs(Cells) do
+			for _, cell in pairs(Cells[x]) do
+				cell:update(dt)
+			end
 		end
 	end
 end
@@ -155,13 +163,15 @@ function love.draw()
 	end
 
 	-- Draw grid
-	for x, _ in pairs(Cells) do
-		for y, cell in pairs(Cells[x]) do
-			cell:draw()
+	if mapReady then
+		for x, _ in pairs(Cells) do
+			for y, cell in pairs(Cells[x]) do
+				cell:draw()
 
-			love.graphics.setColor(0.1, 0.1, 0.1)
-			love.graphics.line(x * CellSize, y, x * CellSize, love.graphics.getHeight())
-			love.graphics.line(x, y * CellSize, love.graphics.getWidth(), y * CellSize)
+				love.graphics.setColor(0.1, 0.1, 0.1)
+				love.graphics.line(x * CellSize, y, x * CellSize, love.graphics.getHeight())
+				love.graphics.line(x, y * CellSize, love.graphics.getWidth(), y * CellSize)
+			end
 		end
 	end
 
