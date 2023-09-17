@@ -97,23 +97,8 @@ function love.load()
 	dumpMap()
 end
 
-local time = 1
-
 ---@diagnostic disable-next-line: duplicate-set-field
 function love.update(dt)
-	time = time - dt
-
-	local secondPassed = false
-
-	if time <= 0 then
-		secondPassed = true
-
-		print("Second passed")
-
-		local leftover = math.abs(time)
-		time = 1 - leftover
-	end
-
 	if love.keyboard.isDown("w") then
 		CameraY = CameraY - 300 * dt
 	elseif love.keyboard.isDown("s") then
@@ -129,7 +114,7 @@ function love.update(dt)
 
 	for x, _ in pairs(Cells) do
 		for _, cell in pairs(Cells[x]) do
-			cell:update(dt, secondPassed)
+			cell:update(dt)
 		end
 	end
 end
