@@ -156,114 +156,127 @@ function Cell:new(x, y, type, direction, content, under)
 	public.content = content or Content:new()
 	public.under = under
 
+	function public:updateGenerator(dt, secondPassed)
+		if
+			self.y + 1 > CellAmount
+			or Cells[self.x][self.y + 1].type ~= CellType.CONVEYOR
+			or not self.under
+			or self.under.content.name == DEFAULT_CONTENT_NAME
+		then
+			return
+		end
+
+		if
+			(
+				Cells[self.x][self.y + 1].content.name == self.under.content.name
+				or Cells[self.x][self.y + 1].content.name == DEFAULT_CONTENT_NAME
+			) and secondPassed
+		then
+			Cells[self.x][self.y + 1].content.name = self.under.content.name
+			Cells[self.x][self.y + 1].content.amount = Cells[self.x][self.y + 1].content.amount + 1
+		end
+	end
+
+	function public:updateConveyor(dt, secondPassed)
+		if self.content.amount <= 0 then
+			self.content.name = DEFAULT_CONTENT_NAME
+			return
+		end
+
+		local offset = { ["x"] = 0, ["y"] = 0 }
+
+		if self.direction == Direction.RIGHT then
+			offset.x = 1
+		elseif self.direction == Direction.DOWN then
+			offset.y = 1
+		elseif self.direction == Direction.LEFT then
+			offset.x = -1
+		elseif self.direction == Direction.UP then
+			offset.y = -1
+		end
+
+		if
+			self.x + offset.x <= 0
+			or self.x + offset.x > CellAmount
+			or self.y + offset.y <= 0
+			or self.y + offset.y > CellAmount
+		then
+			return
+		end
+
+		if
+			self.x + offset.x > CellAmount
+			or self.y + offset.y > CellAmount
+			or Cells[self.x + offset.x][self.y + offset.y].type ~= CellType.CONVEYOR
+			or self.content.amount == 0
+		then
+			return
+		end
+
+		if
+			(
+				Cells[self.x + offset.x][self.y + offset.y].content.name == self.content.name
+				or Cells[self.x + offset.x][self.y + offset.y].content.name == DEFAULT_CONTENT_NAME
+			) and secondPassed
+		then
+			local sub = 3
+			Cells[self.x + offset.x][self.y + offset.y].content.name = self.content.name
+
+			if self.content.amount < 3 then
+				sub = self.content.amount
+			end
+
+			assert(sub <= 3 and sub > 0, "0 < sub <= 3 (current " .. sub .. ")")
+
+			Cells[self.x + offset.x][self.y + offset.y].content.amount = Cells[self.x + offset.x][self.y + offset.y].content.amount
+				+ sub
+
+			self.content.amount = self.content.amount - sub
+
+			if self.content.amount == 0 then
+				self.content.name = DEFAULT_CONTENT_NAME
+			end
+		end
+	end
+
+	---@diagnostic disable-next-line: unused-local
+	function public:updateJunction(dt, secondPassed)
+		if self.y + 1 > CellAmount or self.y - 1 < 0 then
+			return
+		end
+		if
+			(Cells[self.x][self.y + 1].type == CellType.CONVEYOR)
+			and (Cells[self.x][self.y - 1].type == CellType.CONVEYOR and Cells[self.x][self.y - 1].direction == Direction.DOWN)
+			and (Cells[self.x][self.y - 1].content.name == Cells[self.x][self.y + 1].content.name or Cells[self.x][self.y + 1].content.name == DEFAULT_CONTENT_NAME)
+			and (Cells[self.x][self.y - 1].content.amount > 0)
+		then
+			Cells[self.x][self.y - 1].content.amount = Cells[self.x][self.y - 1].content.amount - 1
+			Cells[self.x][self.y + 1].content.amount = Cells[self.x][self.y + 1].content.amount + 1
+			Cells[self.x][self.y + 1].content.name = Cells[self.x][self.y - 1].content.name
+		end
+
+		if self.x + 1 > CellAmount or self.x - 1 < 0 then
+			return
+		end
+		if
+			(Cells[self.x + 1][self.y].type == CellType.CONVEYOR)
+			and (Cells[self.x - 1][self.y].type == CellType.CONVEYOR and Cells[self.x - 1][self.y].direction == Direction.RIGHT)
+			and (Cells[self.x - 1][self.y].content.name == Cells[self.x - 1][self.y].content.name or Cells[self.x + 1][self.y].content.name == DEFAULT_CONTENT_NAME)
+			and (Cells[self.x - 1][self.y].content.amount > 0)
+		then
+			Cells[self.x - 1][self.y].content.amount = Cells[self.x - 1][self.y].content.amount - 1
+			Cells[self.x + 1][self.y].content.amount = Cells[self.x + 1][self.y].content.amount + 1
+			Cells[self.x + 1][self.y].content.name = Cells[self.x - 1][self.y].content.name
+		end
+	end
+
 	function public:update(dt, secondPassed)
 		if self.type == CellType.GENERATOR then
-			if
-				self.y + 1 > CellAmount
-				or Cells[self.x][self.y + 1].type ~= CellType.CONVEYOR
-				or not self.under
-				or self.under.content.name == DEFAULT_CONTENT_NAME
-			then
-				return
-			end
-
-			if
-				(
-					Cells[self.x][self.y + 1].content.name == self.under.content.name
-					or Cells[self.x][self.y + 1].content.name == DEFAULT_CONTENT_NAME
-				) and secondPassed
-			then
-				Cells[self.x][self.y + 1].content.name = self.under.content.name
-				Cells[self.x][self.y + 1].content.amount = Cells[self.x][self.y + 1].content.amount + 1
-			end
+			self:updateGenerator(dt, secondPassed)
 		elseif self.type == CellType.CONVEYOR then
-			if self.content.amount <= 0 then
-				self.content.name = DEFAULT_CONTENT_NAME
-				return
-			end
-
-			local offset = { ["x"] = 0, ["y"] = 0 }
-
-			if self.direction == Direction.RIGHT then
-				offset.x = 1
-			elseif self.direction == Direction.DOWN then
-				offset.y = 1
-			elseif self.direction == Direction.LEFT then
-				offset.x = -1
-			elseif self.direction == Direction.UP then
-				offset.y = -1
-			end
-
-			if
-				self.x + offset.x <= 0
-				or self.x + offset.x > CellAmount
-				or self.y + offset.y <= 0
-				or self.y + offset.y > CellAmount
-			then
-				return
-			end
-
-			if
-				self.x + offset.x > CellAmount
-				or self.y + offset.y > CellAmount
-				or Cells[self.x + offset.x][self.y + offset.y].type ~= CellType.CONVEYOR
-				or self.content.amount == 0
-			then
-				return
-			end
-
-			if
-				(
-					Cells[self.x + offset.x][self.y + offset.y].content.name == self.content.name
-					or Cells[self.x + offset.x][self.y + offset.y].content.name == DEFAULT_CONTENT_NAME
-				) and secondPassed
-			then
-				local sub = 3
-				Cells[self.x + offset.x][self.y + offset.y].content.name = self.content.name
-
-				if self.content.amount < 3 then
-					sub = self.content.amount
-				end
-
-				assert(sub <= 3 and sub > 0, "0 < sub <= 3 (current " .. sub .. ")")
-
-				Cells[self.x + offset.x][self.y + offset.y].content.amount = Cells[self.x + offset.x][self.y + offset.y].content.amount
-					+ sub
-
-				self.content.amount = self.content.amount - sub
-
-				if self.content.amount == 0 then
-					self.content.name = DEFAULT_CONTENT_NAME
-				end
-			end
+			self:updateConveyor(dt, secondPassed)
 		elseif self.type == CellType.JUNCTION then
-			if self.y + 1 > CellAmount or self.y - 1 < 0 then
-				return
-			end
-			if
-				(Cells[self.x][self.y + 1].type == CellType.CONVEYOR)
-				and (Cells[self.x][self.y - 1].type == CellType.CONVEYOR and Cells[self.x][self.y - 1].direction == Direction.DOWN)
-				and (Cells[self.x][self.y - 1].content.name == Cells[self.x][self.y + 1].content.name or Cells[self.x][self.y + 1].content.name == DEFAULT_CONTENT_NAME)
-				and (Cells[self.x][self.y - 1].content.amount > 0)
-			then
-				Cells[self.x][self.y - 1].content.amount = Cells[self.x][self.y - 1].content.amount - 1
-				Cells[self.x][self.y + 1].content.amount = Cells[self.x][self.y + 1].content.amount + 1
-				Cells[self.x][self.y + 1].content.name = Cells[self.x][self.y - 1].content.name
-			end
-
-			if self.x + 1 > CellAmount or self.x - 1 < 0 then
-				return
-			end
-			if
-				(Cells[self.x + 1][self.y].type == CellType.CONVEYOR)
-				and (Cells[self.x - 1][self.y].type == CellType.CONVEYOR and Cells[self.x - 1][self.y].direction == Direction.RIGHT)
-				and (Cells[self.x - 1][self.y].content.name == Cells[self.x - 1][self.y].content.name or Cells[self.x + 1][self.y].content.name == DEFAULT_CONTENT_NAME)
-				and (Cells[self.x - 1][self.y].content.amount > 0)
-			then
-				Cells[self.x - 1][self.y].content.amount = Cells[self.x - 1][self.y].content.amount - 1
-				Cells[self.x + 1][self.y].content.amount = Cells[self.x + 1][self.y].content.amount + 1
-				Cells[self.x + 1][self.y].content.name = Cells[self.x - 1][self.y].content.name
-			end
+			self:updateJunction(dt, secondPassed)
 		end
 	end
 
