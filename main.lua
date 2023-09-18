@@ -172,12 +172,17 @@ function love.draw()
 	-- Draw grid
 	if mapReady then
 		for x, _ in pairs(Cells) do
+			local xDrawn = false
+
 			for y, cell in pairs(Cells[x]) do
 				cell:draw()
 
 				love.graphics.setColor(0.1, 0.1, 0.1)
-				love.graphics.line(x * CellSize, y, x * CellSize, love.graphics.getHeight())
-				love.graphics.line(x, y * CellSize, love.graphics.getWidth(), y * CellSize)
+				if not xDrawn then
+					love.graphics.line(x * CellSize, 0, x * CellSize, CellSize * CellAmount)
+					xDrawn = true
+				end
+				love.graphics.line(0, y * CellSize, CellSize * CellAmount, y * CellSize)
 			end
 		end
 	end
