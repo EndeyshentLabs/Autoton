@@ -159,6 +159,12 @@ function Cell:new(x, y, type, direction, content, under)
 	--- In percents
 	public.progress = 0
 
+	--- cellTime - how long would it take for block to do something (in secs)
+	--- In seconds
+	local generatorTime = 2
+	--- In seconds
+	local conveyorTime = 1
+
 	function public:updateGenerator(dt)
 		if
 			self.y + 1 > CellAmount
@@ -169,7 +175,7 @@ function Cell:new(x, y, type, direction, content, under)
 			return
 		end
 
-		self.progress = self.progress + dt * 50
+		self.progress = self.progress + dt * (100 / generatorTime)
 
 		local updated = false
 		if
@@ -225,7 +231,7 @@ function Cell:new(x, y, type, direction, content, under)
 			return
 		end
 
-		self.progress = self.progress + dt * 100
+		self.progress = self.progress + dt * (100 / conveyorTime)
 
 		local updated = false
 		if
