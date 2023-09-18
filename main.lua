@@ -263,6 +263,7 @@ function love.mousepressed(mouseX, mouseY, button)
 		Cells[a][b].under = under
 	end
 	Cells[a][b].content.amount = 0
+	Cells[a][b].progress = 0
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
