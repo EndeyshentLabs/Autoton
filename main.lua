@@ -290,6 +290,35 @@ function love.keypressed(key)
 		BuildSelection = CellType.CONVEYOR
 	elseif key == "3" then
 		BuildSelection = CellType.JUNCTION
+	elseif key == "p" then
+		require("save")
+		local s = "return ({\n"
+		for x, _ in pairs(Cells) do
+			s = s .. "{\n"
+			for _, cell in pairs(Cells[x]) do
+				s = s .. CellToString(cell) .. ",\n"
+			end
+			s = s .. "},\n"
+		end
+		s = s .. "})"
+
+		local ok, msg = love.filesystem.write("savedata.lua", s)
+		if not ok then
+			love.window.showMessageBox("Saving error!", "Failed to save: " .. msg, "error")
+		else
+			love.window.showMessageBox("Saved!", "Successfully saved!")
+		end
+	elseif key == "l" then
+		local button = love.window.showMessageBox(
+			"Load",
+			"Do you really want to load the last save?\nAll unsaved progress will be lost!",
+			{ "Yes", "No", enterbutton = 1, escapebutton = 2 }
+		)
+		if button == 1 then
+			local save = require("savedata")
+			Cells = save
+			love.window.showMessageBox("Loaded!", "Lastest save loaded!")
+		end
 	end
 end
 
