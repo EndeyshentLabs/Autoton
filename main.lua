@@ -1,11 +1,14 @@
 ---@diagnostic disable: need-check-nil
+Width = 0
+Height = 0
+
 require("utils")
 require("cell")
 require("ui")
 local camera = require("lib.hump.camera")
 
 ShowProgress = true
-CellAmount = 20
+CellAmount = 100
 
 ---@type Direction
 Rotation = Direction.RIGHT
@@ -100,12 +103,15 @@ function love.load()
 	junctionButton = ImageButton:new(48 * 2, 0, 48, 48, Images.junction, function()
 		BuildSelection = CellType.JUNCTION
 	end)
-	progressButton = ImageButton:new(love.graphics.getWidth() - 48, 0, 48, 48, Images.show_progress, function()
+	progressButton = ImageButton:new(Width - 48, 0, 48, 48, Images.show_progress, function()
 		ShowProgress = not ShowProgress
 	end)
 
 	coroutine.resume(mapGeneratorThread)
 	dumpMap()
+
+	Width = love.graphics.getWidth()
+	Height = love.graphics.getHeight()
 
 	mapReady = true
 end
@@ -128,7 +134,9 @@ function love.update(dt)
 	if mapReady then
 		for x, _ in pairs(Cells) do
 			for _, cell in pairs(Cells[x]) do
-				cell:update(dt)
+				if cell.type ~= CellType.ORE and cell.type ~= CellType.NONE then
+					cell:update(dt)
+				end
 			end
 		end
 	end
@@ -140,8 +148,8 @@ function love.draw()
 
 	Camera:attach()
 
-	local a = math.ceil((love.mouse.getX() - (love.graphics.getWidth() / 2) + CameraX) / CellSize)
-	local b = math.ceil((love.mouse.getY() - (love.graphics.getHeight() / 2) + CameraY) / CellSize)
+	local a = math.ceil((love.mouse.getX() - (Width / 2) + CameraX) / CellSize)
+	local b = math.ceil((love.mouse.getY() - (Height / 2) + CameraY) / CellSize)
 
 	local previewImage = imageFromCell(Cell:new(0, 0, BuildSelection))
 
@@ -173,6 +181,11 @@ function love.draw()
 	if mapReady then
 		for x, _ in pairs(Cells) do
 			local xDrawn = false
+			local camX = CameraX - Width / 2
+			local camY = CameraY - Height / 2
+			if (x * CellSize - CellSize >= CameraX + Width / 2) or (x * CellSize <= camX) then
+				goto continue2
+			end
 
 			for y, cell in pairs(Cells[x]) do
 				cell:draw()
@@ -182,8 +195,15 @@ function love.draw()
 					love.graphics.line(x * CellSize, 0, x * CellSize, CellSize * CellAmount)
 					xDrawn = true
 				end
+
+				if (y * CellSize - CellSize >= CameraY + Height / 2) or (y * CellSize <= camY) then
+					goto continue
+				end
+
 				love.graphics.line(0, y * CellSize, CellSize * CellAmount, y * CellSize)
+				::continue::
 			end
+			::continue2::
 		end
 	end
 
@@ -227,8 +247,8 @@ function love.mousepressed(mouseX, mouseY, button)
 		return
 	end
 
-	local x = mouseX - love.graphics.getWidth() / 2 + CameraX
-	local y = mouseY - love.graphics.getHeight() / 2 + CameraY
+	local x = mouseX - Width / 2 + CameraX
+	local y = mouseY - Height / 2 + CameraY
 	local a = math.ceil(x / CellSize)
 	local b = math.ceil(y / CellSize)
 
@@ -324,5 +344,7 @@ end
 
 ---@diagnostic disable-next-line: duplicate-set-field
 function love.resize()
-	progressButton.x = love.graphics.getWidth() - 48
+	Width = love.graphics.getWidth()
+	Height = love.graphics.getHeight()
+	progressButton.x = Width - 48
 end

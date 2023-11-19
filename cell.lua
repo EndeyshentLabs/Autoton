@@ -56,19 +56,15 @@ end
 ---@param y integer
 ---@param cell Cell
 function drawCell(x, y, cell)
-	local camX = CameraX - love.graphics.getWidth() / 2
-	local camY = CameraY - love.graphics.getHeight() / 2
+	local camX = CameraX - Width / 2
+	local camY = CameraY - Height / 2
 
-	if x * CellSize - CellSize >= CameraX + love.graphics.getWidth() / 2 then
-		return
-	end
-	if x * CellSize <= camX then
-		return
-	end
-	if y * CellSize - CellSize >= CameraY + love.graphics.getHeight() / 2 then
-		return
-	end
-	if y * CellSize <= camY then
+	if
+		(x * CellSize - CellSize >= CameraX + Width / 2)
+		or (x * CellSize <= camX)
+		or (y * CellSize - CellSize >= CameraY + Height / 2)
+		or (y * CellSize <= camY)
+	then
 		return
 	end
 
@@ -367,6 +363,18 @@ function Cell:new(x, y, type, direction, content, under)
 		drawCell(self.x, self.y, self)
 
 		love.graphics.setColor(0.5, 0.5, 0.5)
+		local camX = CameraX - Width / 2
+		local camY = CameraY - Height / 2
+
+		if
+			(x * CellSize - CellSize >= CameraX + Width / 2)
+			or (x * CellSize <= camX)
+			or (y * CellSize - CellSize >= CameraY + Height / 2)
+			or (y * CellSize <= camY)
+		then
+			return
+		end
+
 		love.graphics.print(
 			("%s\n%d\n%d%%"):format(self.content.name, self.content.amount, self.progress),
 			(x - 1) * CellSize + 1,
