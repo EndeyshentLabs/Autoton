@@ -356,6 +356,10 @@ function love.keypressed(key)
 			Cells = save
 			love.window.showMessageBox("Loaded!", "Lastest save loaded!")
 		end
+	elseif key == "f5" then
+		mapReady = false
+		generateMap()
+		mapReady = true
 	end
 end
 
