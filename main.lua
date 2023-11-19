@@ -1,4 +1,3 @@
----@diagnostic disable: need-check-nil
 Width = 0
 Height = 0
 
