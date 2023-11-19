@@ -32,6 +32,8 @@ local function dumpMap()
 	end
 end
 
+local mapGeneration = 0
+
 local function generateMap()
 	local oreGrid = {}
 	local baseX = 10000 * love.math.random()
@@ -65,6 +67,8 @@ local function generateMap()
 			Cells[x][y] = Cell:new(x, y, type, nil, Content:new(contentName))
 		end
 	end
+
+	mapGeneration = mapGeneration + 1
 end
 
 Camera = nil
@@ -81,6 +85,12 @@ function love.load()
 		---@diagnostic disable-next-line: lowercase-global
 		vudu = require("lib.vudu.vudu")
 		vudu:initialize()
+	end
+
+	for _, v in pairs(arg) do
+		if v:match("%-%-%d+") then
+			love.math.setRandomSeed(v:match("%d+"))
+		end
 	end
 
 	Camera = camera()
@@ -234,6 +244,13 @@ function love.draw()
 		love.graphics.setColor(0, 1, 0)
 		love.graphics.rectangle("line", currentButton.x, currentButton.y, currentButton.w, currentButton.h)
 	end
+
+	love.graphics.setColor(1, 1, 1)
+	love.graphics.print(
+		("FPS: %d  Seed: %d (Generation: %d)"):format(love.timer.getFPS(), love.math.getRandomSeed(), mapGeneration),
+		0,
+		Height - Font:getHeight()
+	)
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
