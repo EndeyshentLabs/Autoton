@@ -5,7 +5,7 @@ require("lib.32log")
 ---@field y integer
 ---@field w integer Width
 ---@field h integer Height
----@field image love.image
+---@field image love.Image
 ---@field callback function
 ---@field draw function
 ---@field update function
@@ -24,7 +24,7 @@ class("ImageButton")({
 ---@param y integer
 ---@param w integer Width
 ---@param h integer Height
----@param image love.image
+---@param image love.Image
 ---@param callback function
 function ImageButton:__init(x, y, w, h, image, callback)
 	self.x = x

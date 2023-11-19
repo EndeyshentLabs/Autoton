@@ -153,7 +153,7 @@ function Cell:new(x, y, type, direction, content, under)
 	public.x = x
 	public.y = y
 	public.type = type
-	public.direction = direction or 0
+	public.direction = direction or Direction.RIGHT
 	public.content = content or Content:new()
 	public.under = under
 	--- In percents
