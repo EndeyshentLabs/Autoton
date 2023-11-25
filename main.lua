@@ -1,5 +1,5 @@
-Width = 0
-Height = 0
+Width = love.graphics.getWidth()
+Height = love.graphics.getHeight()
 
 require("utils")
 require("cell")
@@ -118,9 +118,6 @@ function love.load()
 
 	coroutine.resume(mapGeneratorThread)
 	dumpMap()
-
-	Width = love.graphics.getWidth()
-	Height = love.graphics.getHeight()
 
 	mapReady = true
 end
