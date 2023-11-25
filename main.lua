@@ -83,7 +83,8 @@ function love.load()
 	if isDebug() then
 		---@diagnostic disable-next-line: lowercase-global
 		vudu = require("lib.vudu.vudu")
-		vudu:initialize()
+		vudu.initialize()
+		vudu.initializeDefaultHotkeys()
 	end
 
 	for _, v in pairs(arg) do
