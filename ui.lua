@@ -7,8 +7,8 @@ require("lib.32log")
 ---@field h integer Height
 ---@field image love.Image
 ---@field callback function
----@field draw function
----@field update function
+---@field new function<integer, integer, integer, integer, love.Image, function>
+ImageButton = {}
 class("ImageButton")({
 	x = 0,
 	y = 0,
