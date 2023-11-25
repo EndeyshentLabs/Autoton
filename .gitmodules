@@ -1,0 +1,6 @@
+[submodule "lib/hump"]
+	path = lib/hump
+	url = https://github.com/vrld/hump.git
+[submodule "lib/vudu"]
+	path = lib/vudu
+	url = https://github.com/deltadaedalus/vudu.git
