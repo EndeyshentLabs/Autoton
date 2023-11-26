@@ -70,3 +70,11 @@ function isDebug()
 		return false
 	end
 end
+
+function protectEnum(e)
+	setmetatable(e, {
+		__newindex = function()
+			error("Changing values of enums in not allowed!")
+		end,
+	})
+end

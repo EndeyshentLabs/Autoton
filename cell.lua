@@ -6,6 +6,8 @@ ContentType = {
 	GOLD = "gold",
 }
 
+protectEnum(ContentType)
+
 DEFAULT_CONTENT_NAME = "OH_NO"
 
 ---@class Content
@@ -118,6 +120,8 @@ function CellType.tostring(cellType)
 	end
 end
 
+protectEnum(CellType)
+
 ---@enum Direction
 Direction = {
 	RIGHT = 0,
@@ -125,6 +129,8 @@ Direction = {
 	LEFT = 2,
 	UP = 3,
 }
+
+protectEnum(Direction)
 
 ---@class Cell
 ---@field type CellType
