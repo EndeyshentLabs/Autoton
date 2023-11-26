@@ -9,6 +9,8 @@ local camera = require("lib.hump.camera")
 ShowProgress = true
 CellAmount = 100
 
+PlayTime = 0
+
 ---@type Direction
 Rotation = Direction.RIGHT
 ---@type CellType
@@ -22,6 +24,10 @@ local conveyorButton = nil
 local junctionButton = nil
 ---@type ImageButton
 local progressButton = nil
+---@type ImageButton
+local saveButton = nil
+---@type ImageButton
+local loadButton = nil
 
 local function dumpMap()
 	for x, _ in pairs(Cells) do
@@ -102,6 +108,8 @@ function love.load()
 	Images.generator = love.graphics.newImage("res/gfx/generator.png")
 	Images.ore_iron = love.graphics.newImage("res/gfx/ore-iron.png")
 	Images.ore_gold = love.graphics.newImage("res/gfx/ore-gold.png")
+	Images.load = love.graphics.newImage("res/gfx/load.png")
+	Images.save = love.graphics.newImage("res/gfx/save.png")
 	Images.show_progress = love.graphics.newImage("res/gfx/show-progress.png")
 
 	generatorButton = ImageButton:new(48 * 0, 0, 48, 48, Images.generator, function()
@@ -116,6 +124,8 @@ function love.load()
 	progressButton = ImageButton:new(Width - 48, 0, 48, 48, Images.show_progress, function()
 		ShowProgress = not ShowProgress
 	end)
+	loadButton = ImageButton:new(Width - 48 * 2, 0, 48, 48, Images.load, loadGame)
+	saveButton = ImageButton:new(Width - 48 * 3, 0, 48, 48, Images.save, saveGame)
 
 	coroutine.resume(mapGeneratorThread)
 	dumpMap()
@@ -125,6 +135,7 @@ end
 
 ---@diagnostic disable-next-line: duplicate-set-field
 function love.update(dt)
+	PlayTime = PlayTime + dt
 	if love.keyboard.isDown("w") then
 		CameraY = CameraY - 300 * dt
 	elseif love.keyboard.isDown("s") then
@@ -227,6 +238,8 @@ function love.draw()
 		love.graphics.setColor(1, 0, 0)
 	end
 	love.graphics.rectangle("line", progressButton.x, progressButton.y, progressButton.w, progressButton.h)
+	loadButton:draw()
+	saveButton:draw()
 
 	local currentButton = nil
 	if BuildSelection == CellType.GENERATOR then
@@ -244,7 +257,12 @@ function love.draw()
 
 	love.graphics.setColor(1, 1, 1)
 	love.graphics.print(
-		("FPS: %d  Seed: %d (Generation: %d)"):format(love.timer.getFPS(), love.math.getRandomSeed(), mapGeneration),
+		("FPS: %d  Seed: %d (Generation: %d)  PlayTime: %f"):format(
+			love.timer.getFPS(),
+			love.math.getRandomSeed(),
+			mapGeneration,
+			PlayTime
+		),
 		0,
 		Height - Font:getHeight()
 	)
@@ -256,6 +274,8 @@ function love.mousepressed(mouseX, mouseY, button)
 	conveyorButton:update()
 	junctionButton:update()
 	progressButton:update()
+	loadButton:update()
+	saveButton:update()
 
 	if button > 2 then
 		return
@@ -325,34 +345,9 @@ function love.keypressed(key)
 	elseif key == "3" then
 		BuildSelection = CellType.JUNCTION
 	elseif key == "p" then
-		require("save")
-		local s = "return ({\n"
-		for x, _ in pairs(Cells) do
-			s = s .. "{\n"
-			for _, cell in pairs(Cells[x]) do
-				s = s .. CellToString(cell) .. ",\n"
-			end
-			s = s .. "},\n"
-		end
-		s = s .. "})"
-
-		local ok, msg = love.filesystem.write("savedata.lua", s)
-		if not ok then
-			love.window.showMessageBox("Saving error!", "Failed to save: " .. msg, "error")
-		else
-			love.window.showMessageBox("Saved!", "Successfully saved!")
-		end
+		saveGame()
 	elseif key == "l" then
-		local button = love.window.showMessageBox(
-			"Load",
-			"Do you really want to load the last save?\nAll unsaved progress will be lost!",
-			{ "Yes", "No", enterbutton = 1, escapebutton = 2 }
-		)
-		if button == 1 then
-			local save = require("savedata")
-			Cells = save
-			love.window.showMessageBox("Loaded!", "Lastest save loaded!")
-		end
+		loadGame()
 	elseif key == "f5" then
 		mapReady = false
 		generateMap()
@@ -365,4 +360,48 @@ function love.resize()
 	Width = love.graphics.getWidth()
 	Height = love.graphics.getHeight()
 	progressButton.x = Width - 48
+	loadButton.x = Width - 48 * 2
+	saveButton.x = Width - 48 * 3
+end
+
+function saveGame()
+	require("save")
+	local s = ("return ({{ playTime = %f, seed = %d, generation = %d }, {\n"):format(
+		PlayTime,
+		love.math.getRandomSeed(),
+		mapGeneration
+	)
+	for x, _ in pairs(Cells) do
+		s = s .. "{\n"
+		for _, cell in pairs(Cells[x]) do
+			s = s .. CellToString(cell) .. ",\n"
+		end
+		s = s .. "},\n"
+	end
+	s = s .. "}})"
+
+	local ok, msg = love.filesystem.write("savedata.lua", s)
+	if not ok then
+		love.window.showMessageBox("Saving error!", "Failed to save: " .. msg, "error")
+	else
+		love.window.showMessageBox("Saved!", "Successfully saved!")
+	end
+end
+
+function loadGame()
+	local button = love.window.showMessageBox(
+		"Load",
+		"Do you really want to load the last save?\nAll unsaved progress will be lost!",
+		{ "Yes", "No", enterbutton = 1, escapebutton = 2 }
+	)
+	if button == 1 then
+		local savedata = require("savedata")
+		local info = savedata[1]
+		local save = savedata[2]
+		PlayTime = info.playTime or 0
+		love.math.setRandomSeed(info.seed or 0)
+		mapGeneration = info.generation or 1
+		Cells = save
+		love.window.showMessageBox("Loaded!", "Lastest save loaded!")
+	end
 end
