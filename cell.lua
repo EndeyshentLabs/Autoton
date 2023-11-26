@@ -161,6 +161,19 @@ function Cell:new(x, y, type, direction, content, under)
 	--- In seconds
 	local conveyorTime = 1
 
+	--- Get reference to a cell positioned at `relX` and `relY` relatively to `self` cell
+	---@param relX? integer
+	---@param relY? integer
+	---@return Cell|nil
+	function public:lookup(relX, relY)
+		relX = relX or 0
+		relY = relY or 0
+		if (self.x + relX <= 0 or self.x + relX > CellAmount) or (self.y + relY <= 0 or self.x + relX > CellAmount) then
+			return nil
+		end
+		return Cells[self.x + relX][self.y + relY]
+	end
+
 	function public:updateGenerator(dt)
 		if
 			self.y + 1 > CellAmount
