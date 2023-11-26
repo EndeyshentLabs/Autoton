@@ -59,14 +59,12 @@ local function generateMap()
 			local type = 0
 			local contentName = DEFAULT_CONTENT_NAME
 
-			if oreGrid[x][y] > 0.5 then
+			if oreGrid[x][y] > 0.8 then
+				type = CellType.ORE -- NOTE: Coal would be better
+				contentName = ContentType.IRON
+			elseif oreGrid[x][y] < 0.1 then
 				type = CellType.ORE
-
-				if love.math.random(1, 2) == 1 then
-					contentName = ContentType.IRON
-				else
-					contentName = ContentType.GOLD
-				end
+				contentName = ContentType.GOLD
 			end
 
 			Cells[x][y] = Cell:new(x, y, type, nil, Content:new(contentName))
