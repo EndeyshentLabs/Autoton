@@ -161,10 +161,24 @@ function Cell:new(x, y, type, direction, content, under)
 	--- In seconds
 	local conveyorTime = 1
 
+	--- Get reference to a cell positioned at `relX` and `relY` relatively to `self` cell
+	---@param relX? integer
+	---@param relY? integer
+	---@return Cell|nil
+	function public:lookup(relX, relY)
+		relX = relX or 0
+		relY = relY or 0
+		if (self.x + relX <= 0 or self.x + relX > CellAmount) or (self.y + relY <= 0 or self.x + relX > CellAmount) then
+			return nil
+		end
+		return Cells[self.x + relX][self.y + relY]
+	end
+
 	function public:updateGenerator(dt)
+		local cellUnder = self:lookup(0, 1)
 		if
-			self.y + 1 > CellAmount
-			or Cells[self.x][self.y + 1].type ~= CellType.CONVEYOR
+			not cellUnder
+			or cellUnder.type ~= CellType.CONVEYOR
 			or not self.under
 			or self.under.content.name == DEFAULT_CONTENT_NAME
 		then
@@ -175,13 +189,11 @@ function Cell:new(x, y, type, direction, content, under)
 
 		local updated = false
 		if
-			(
-				Cells[self.x][self.y + 1].content.name == self.under.content.name
-				or Cells[self.x][self.y + 1].content.name == DEFAULT_CONTENT_NAME
-			) and self.progress >= 100
+			(cellUnder.content.name == self.under.content.name or cellUnder.content.name == DEFAULT_CONTENT_NAME)
+			and self.progress >= 100
 		then
-			Cells[self.x][self.y + 1].content.name = self.under.content.name
-			Cells[self.x][self.y + 1].content.amount = Cells[self.x][self.y + 1].content.amount + 1
+			cellUnder.content.name = self.under.content.name
+			cellUnder.content.amount = cellUnder.content.amount + 1
 
 			updated = true
 		end
@@ -209,20 +221,16 @@ function Cell:new(x, y, type, direction, content, under)
 			offset.y = -1
 		end
 
-		if
-			self.x + offset.x <= 0
-			or self.x + offset.x > CellAmount
-			or self.y + offset.y <= 0
-			or self.y + offset.y > CellAmount
-		then
+		local dstCell = self:lookup(offset.x, offset.y)
+		if not dstCell then
 			return
 		end
 
 		if
-			self.x + offset.x > CellAmount
-			or self.y + offset.y > CellAmount
-			or Cells[self.x + offset.x][self.y + offset.y].type ~= CellType.CONVEYOR
+			not dstCell
+			or dstCell.type ~= CellType.CONVEYOR
 			or self.content.amount == 0
+			or (dstCell.content.name ~= self.content.name and dstCell.content.name ~= DEFAULT_CONTENT_NAME)
 		then
 			return
 		end
@@ -231,13 +239,11 @@ function Cell:new(x, y, type, direction, content, under)
 
 		local updated = false
 		if
-			(
-				Cells[self.x + offset.x][self.y + offset.y].content.name == self.content.name
-				or Cells[self.x + offset.x][self.y + offset.y].content.name == DEFAULT_CONTENT_NAME
-			) and self.progress >= 100
+			(dstCell.content.name == self.content.name or dstCell.content.name == DEFAULT_CONTENT_NAME)
+			and self.progress >= 100
 		then
 			local sub = 3
-			Cells[self.x + offset.x][self.y + offset.y].content.name = self.content.name
+			dstCell.content.name = self.content.name
 
 			if self.content.amount < 3 then
 				sub = self.content.amount
@@ -245,8 +251,7 @@ function Cell:new(x, y, type, direction, content, under)
 
 			assert(sub <= 3 and sub > 0, "0 < sub <= 3 (current " .. sub .. ")")
 
-			Cells[self.x + offset.x][self.y + offset.y].content.amount = Cells[self.x + offset.x][self.y + offset.y].content.amount
-				+ sub
+			dstCell.content.amount = dstCell.content.amount + sub
 
 			self.content.amount = self.content.amount - sub
 
@@ -265,40 +270,36 @@ function Cell:new(x, y, type, direction, content, under)
 		inputOffset.y = 0
 
 		if self.x - 1 > 0 and self.x + 1 <= CellAmount then
-			if
-				Cells[self.x - 1][self.y].type == CellType.CONVEYOR
-				and Cells[self.x - 1][self.y].direction == Direction.RIGHT
-			then
+			if self:lookup(-1).type == CellType.CONVEYOR and self:lookup(-1).direction == Direction.RIGHT then
 				inputOffset.x = -1
-			elseif
-				Cells[self.x + 1][self.y].type == CellType.CONVEYOR
-				and Cells[self.x + 1][self.y].direction == Direction.LEFT
-			then
+			elseif self:lookup(1).type == CellType.CONVEYOR and self:lookup(1).direction == Direction.LEFT then
 				inputOffset.x = 1
 			else
 				goto next
 			end
 
-			if Cells[self.x + inputOffset.x * -1][self.y].type ~= CellType.CONVEYOR then
+			local outputCell = self:lookup(-inputOffset.x)
+			if not outputCell or outputCell.type ~= CellType.CONVEYOR then
 				goto next
 			end
 
 			if inputOffset.x ~= 0 then
-				if Cells[self.x + inputOffset.x][self.y].content.name == DEFAULT_CONTENT_NAME then
+				local inputCell = self:lookup(inputOffset.x)
+				if not inputCell or inputCell.content.name == DEFAULT_CONTENT_NAME then
 					goto next
 				end
 
 				if
-					Cells[self.x + inputOffset.x][self.y].content.name
-						== Cells[self.x + inputOffset.x * -1][self.y].content.name
-					or Cells[self.x + inputOffset.x * -1][self.y].content.name == DEFAULT_CONTENT_NAME
+					(inputCell and outputCell)
+					and (
+						inputCell.content.name == outputCell.content.name
+						or outputCell.content.name == DEFAULT_CONTENT_NAME
+					)
 				then
-					Cells[self.x + inputOffset.x * -1][self.y].content.name =
-						Cells[self.x + inputOffset.x][self.y].content.name
-					Cells[self.x + inputOffset.x * -1][self.y].content.amount = Cells[self.x + inputOffset.x * -1][self.y].content.amount
-						+ Cells[self.x + inputOffset.x][self.y].content.amount
-					Cells[self.x + inputOffset.x][self.y].content.amount = 0
-					Cells[self.x + inputOffset.x][self.y].content.name = DEFAULT_CONTENT_NAME
+					outputCell.content.name = inputCell.content.name
+					outputCell.content.amount = outputCell.content.amount + inputCell.content.amount
+					inputCell.content.amount = 0
+					inputCell.content.name = DEFAULT_CONTENT_NAME
 				end
 			end
 		end
@@ -306,36 +307,32 @@ function Cell:new(x, y, type, direction, content, under)
 		::next::
 
 		if self.y - 1 > 0 and self.y + 1 <= CellAmount then
-			if
-				Cells[self.x][self.y - 1].type == CellType.CONVEYOR
-				and Cells[self.x][self.y - 1].direction == Direction.DOWN
-			then
+			if self:lookup(0, -1).type == CellType.CONVEYOR and self:lookup(0, -1).direction == Direction.DOWN then
 				inputOffset.y = -1
-			elseif
-				Cells[self.x][self.y + 1].type == CellType.CONVEYOR
-				and Cells[self.x][self.y + 1].direction == Direction.UP
-			then
+			elseif self:lookup(0, 1).type == CellType.CONVEYOR and self:lookup(0, 1).direction == Direction.UP then
 				inputOffset.y = 1
 			else
 				return
 			end
 
-			if Cells[self.x][self.y + inputOffset.y * -1].type ~= CellType.CONVEYOR then
+			local outputCell = self:lookup(0, -inputOffset.y)
+			if not outputCell or outputCell.type ~= CellType.CONVEYOR then
 				return
 			end
 
 			if inputOffset.y ~= 0 then
+				local inputCell = self:lookup(0, inputOffset.y)
 				if
-					Cells[self.x][self.y + inputOffset.y].content.name
-						== Cells[self.x][self.y + inputOffset.y * -1].content.name
-					or Cells[self.x][self.y + inputOffset.y * -1].content.name == DEFAULT_CONTENT_NAME
+					(inputCell and outputCell)
+					and (
+						inputCell.content.name == outputCell.content.name
+						or outputCell.content.name == DEFAULT_CONTENT_NAME
+					)
 				then
-					Cells[self.x][self.y + inputOffset.y * -1].content.name =
-						Cells[self.x][self.y + inputOffset.y].content.name
-					Cells[self.x][self.y + inputOffset.y * -1].content.amount = Cells[self.x][self.y + inputOffset.y * -1].content.amount
-						+ Cells[self.x][self.y + inputOffset.y].content.amount
-					Cells[self.x][self.y + inputOffset.y].content.amount = 0
-					Cells[self.x][self.y + inputOffset.y].content.name = DEFAULT_CONTENT_NAME
+					outputCell.content.name = inputCell.content.name
+					outputCell.content.amount = outputCell.content.amount + inputCell.content.amount
+					inputCell.content.amount = 0
+					inputCell.content.name = DEFAULT_CONTENT_NAME
 				end
 			end
 		end
