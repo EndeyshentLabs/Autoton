@@ -1,101 +1,8 @@
+require("content")
+
 Cells = {}
 
----@enum ContentType
-ContentType = {
-	IRON = "iron",
-	GOLD = "gold",
-}
-
-protectEnum(ContentType)
-
-DEFAULT_CONTENT_NAME = "OH_NO"
-
----@class Content
----@field name string
----@field amount integer
-Content = {}
-
----Content class constructor
----@param name? string
----@param amount? integer
----@return Content
-function Content:new(name, amount)
-	local public = {}
-	public.name = name or DEFAULT_CONTENT_NAME
-	public.amount = amount or 0
-
-	setmetatable(public, self)
-	self.__index = self
-	return public
-end
-
 CellSize = 64
-
----Returns cell's sprite based on it's type
----@param cell Cell
----@return love.Image|nil
-function imageFromCell(cell)
-	local type = cell.type
-
-	if type == CellType.CONVEYOR then
-		return Images.conveyor
-	elseif type == CellType.JUNCTION then
-		return Images.junction
-	elseif type == CellType.GENERATOR then
-		return Images.generator
-	elseif type == CellType.ORE then
-		if cell.content.name == ContentType.IRON then
-			return Images.ore_iron
-		elseif cell.content.name == ContentType.GOLD then
-			return Images.ore_gold
-		end
-	end
-
-	return nil
-end
-
----@param x integer
----@param y integer
----@param cell Cell
-function drawCell(x, y, cell)
-	local camX = CameraX - Width / 2
-	local camY = CameraY - Height / 2
-
-	if
-		(x * CellSize - CellSize >= CameraX + Width / 2)
-		or (x * CellSize <= camX)
-		or (y * CellSize - CellSize >= CameraY + Height / 2)
-		or (y * CellSize <= camY)
-	then
-		return
-	end
-
-	local image = imageFromCell(cell)
-
-	if image then
-		local offsetX = 0
-		local offsetY = 0
-
-		if cell.direction == Direction.DOWN then
-			offsetX = CellSize
-		elseif cell.direction == Direction.LEFT then
-			offsetX = CellSize
-			offsetY = CellSize
-		elseif cell.direction == Direction.UP then
-			offsetY = CellSize
-		end
-
-		love.graphics.setColor(1, 1, 1)
-		love.graphics.draw(
-			image,
-			(x - 1) * CellSize + offsetX,
-			(y - 1) * CellSize + offsetY,
-			cell.direction * math.rad(90),
-			CellSize / 128,
-			CellSize / 128
-		)
-	end
-end
 
 ---@enum CellType
 CellType = {
@@ -104,6 +11,7 @@ CellType = {
 	CONVEYOR = 2,
 	JUNCTION = 3,
 	ORE = 4,
+	CORE = 5,
 }
 
 function CellType.tostring(cellType)
@@ -115,6 +23,8 @@ function CellType.tostring(cellType)
 		return "JUNCTION"
 	elseif cellType == CellType.ORE then
 		return "ORE"
+	elseif cellType == CellType.CORE then
+		return "CORE"
 	elseif cellType == CellType.NONE then
 		return "(void)"
 	end
@@ -133,6 +43,8 @@ Direction = {
 protectEnum(Direction)
 
 ---@class Cell
+---@field x integer
+---@field y integer
 ---@field type CellType
 ---@field direction Direction
 ---@field content Content
@@ -234,7 +146,7 @@ function Cell:new(x, y, type, direction, content, under)
 
 		if
 			not dstCell
-			or dstCell.type ~= CellType.CONVEYOR
+			or (dstCell.type ~= CellType.CONVEYOR and dstCell.type ~= CellType.CORE)
 			or self.content.amount == 0
 			or (dstCell.content.name ~= self.content.name and dstCell.content.name ~= DEFAULT_CONTENT_NAME)
 		then
@@ -244,7 +156,13 @@ function Cell:new(x, y, type, direction, content, under)
 		self.progress = self.progress + dt * (100 / conveyorTime)
 
 		local updated = false
-		if
+		if dstCell.type == CellType.CORE and self.progress >= 100 then
+			Core:add(self.content)
+
+			self.content = Content:new()
+
+			updated = true
+		elseif
 			(dstCell.content.name == self.content.name or dstCell.content.name == DEFAULT_CONTENT_NAME)
 			and self.progress >= 100
 		then
@@ -360,28 +278,28 @@ function Cell:new(x, y, type, direction, content, under)
 
 	function public:draw()
 		if self.under then
-			drawCell(self.x, self.y, self.under)
+			drawCell(self.under)
 		end
 
-		drawCell(self.x, self.y, self)
+		drawCell(self)
 
 		love.graphics.setColor(0.5, 0.5, 0.5)
 		local camX = CameraX - Width / 2
 		local camY = CameraY - Height / 2
 
 		if
-			(x * CellSize - CellSize >= CameraX + Width / 2)
-			or (x * CellSize <= camX)
-			or (y * CellSize - CellSize >= CameraY + Height / 2)
-			or (y * CellSize <= camY)
+			(self.x * CellSize - CellSize >= CameraX + Width / 2)
+			or (self.x * CellSize <= camX)
+			or (self.y * CellSize - CellSize >= CameraY + Height / 2)
+			or (self.y * CellSize <= camY)
 		then
 			return
 		end
 
 		love.graphics.print(
 			("%s\n%d\n%d%%"):format(self.content.name, self.content.amount, self.progress),
-			(x - 1) * CellSize + 1,
-			(y - 1) * CellSize + 1
+			(self.x - 1) * CellSize + 1,
+			(self.y - 1) * CellSize + 1
 		)
 
 		if self.progress > 0 and ShowProgress then
@@ -398,4 +316,70 @@ function Cell:new(x, y, type, direction, content, under)
 	setmetatable(public, self)
 	self.__index = self
 	return public
+end
+
+---Returns cell's sprite based on it's type
+---@param cell Cell
+---@return love.Image|nil
+function imageFromCell(cell)
+	local type = cell.type
+
+	if type == CellType.CONVEYOR then
+		return Images.conveyor
+	elseif type == CellType.JUNCTION then
+		return Images.junction
+	elseif type == CellType.GENERATOR then
+		return Images.generator
+	elseif type == CellType.CORE then
+		return Images.core
+	elseif type == CellType.ORE then
+		if cell.content.name == ContentType.IRON then
+			return Images.ore_iron
+		elseif cell.content.name == ContentType.GOLD then
+			return Images.ore_gold
+		end
+	end
+
+	return nil
+end
+
+---@param cell Cell
+function drawCell(cell)
+	local camX = CameraX - Width / 2
+	local camY = CameraY - Height / 2
+
+	if
+		(cell.x * CellSize - CellSize >= CameraX + Width / 2)
+		or (cell.x * CellSize <= camX)
+		or (cell.y * CellSize - CellSize >= CameraY + Height / 2)
+		or (cell.y * CellSize <= camY)
+	then
+		return
+	end
+
+	local image = imageFromCell(cell)
+
+	if image then
+		local offsetX = 0
+		local offsetY = 0
+
+		if cell.direction == Direction.DOWN then
+			offsetX = CellSize
+		elseif cell.direction == Direction.LEFT then
+			offsetX = CellSize
+			offsetY = CellSize
+		elseif cell.direction == Direction.UP then
+			offsetY = CellSize
+		end
+
+		love.graphics.setColor(1, 1, 1)
+		love.graphics.draw(
+			image,
+			(cell.x - 1) * CellSize + offsetX,
+			(cell.y - 1) * CellSize + offsetY,
+			cell.direction * math.rad(90),
+			CellSize / 128,
+			CellSize / 128
+		)
+	end
 end

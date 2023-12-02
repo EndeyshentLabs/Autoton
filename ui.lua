@@ -46,6 +46,7 @@ function ImageButton:update()
 		and love.mouse.getY() <= self.y + self.h
 	then
 		self.callback()
+		return true
 	end
 end
 

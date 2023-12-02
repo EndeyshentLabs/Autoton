@@ -6,6 +6,21 @@ require("cell")
 require("ui")
 local camera = require("lib.hump.camera")
 
+Core = {}
+---@param resource Content
+function Core:add(resource)
+	self[resource.name] = (self[resource.name] or 0) + resource.amount
+end
+---@param resource Content
+function Core:remove(resource)
+	self[resource.name] = (self[resource.name] or 0) - resource.amount
+	if self[resource.name] <= 0 then
+		self[resource.name] = nil
+	end
+end
+
+local corePlased = false
+
 ShowProgress = true
 CellAmount = 100
 
@@ -22,6 +37,8 @@ local generatorButton = nil
 local conveyorButton = nil
 ---@type ImageButton
 local junctionButton = nil
+---@type ImageButton
+local coreButton = nil
 ---@type ImageButton
 local progressButton = nil
 ---@type ImageButton
@@ -56,13 +73,15 @@ local function generateMap()
 		Cells[x] = {}
 
 		for y = 1, CellAmount, 1 do
-			local type = 0
+			---@type CellType
+			local type = CellType.NONE
+			---@type ContentType
 			local contentName = DEFAULT_CONTENT_NAME
 
-			if oreGrid[x][y] > 0.8 then
-				type = CellType.ORE -- NOTE: Coal would be better
-				contentName = ContentType.IRON
-			elseif oreGrid[x][y] < 0.1 then
+			if oreGrid[x][y] > OreContentSpawnRates["iron"] then
+				type = CellType.ORE
+				contentName = ContentType.IRON -- NOTE: Coal would be better
+			elseif oreGrid[x][y] < OreContentSpawnRates["gold"] then
 				type = CellType.ORE
 				contentName = ContentType.GOLD
 			end
@@ -101,6 +120,7 @@ function love.load()
 	Font = love.graphics.newFont("res/fonts/fira.ttf", 15)
 
 	Images = {}
+	Images.ohno = love.graphics.newImage("res/gfx/ohno.png")
 	Images.conveyor = love.graphics.newImage("res/gfx/conveyor.png")
 	Images.junction = love.graphics.newImage("res/gfx/junction.png")
 	Images.generator = love.graphics.newImage("res/gfx/generator.png")
@@ -109,6 +129,7 @@ function love.load()
 	Images.load = love.graphics.newImage("res/gfx/load.png")
 	Images.save = love.graphics.newImage("res/gfx/save.png")
 	Images.show_progress = love.graphics.newImage("res/gfx/show-progress.png")
+	Images.core = love.graphics.newImage("res/gfx/core.png")
 
 	generatorButton = ImageButton:new(48 * 0, 0, 48, 48, Images.generator, function()
 		BuildSelection = CellType.GENERATOR
@@ -118,6 +139,9 @@ function love.load()
 	end)
 	junctionButton = ImageButton:new(48 * 2, 0, 48, 48, Images.junction, function()
 		BuildSelection = CellType.JUNCTION
+	end)
+	coreButton = ImageButton:new(48 * 3, 0, 48, 48, Images.core, function()
+		BuildSelection = CellType.CORE
 	end)
 	progressButton = ImageButton:new(Width - 48, 0, 48, 48, Images.show_progress, function()
 		ShowProgress = not ShowProgress
@@ -229,6 +253,7 @@ function love.draw()
 	generatorButton:draw()
 	conveyorButton:draw()
 	junctionButton:draw()
+	coreButton:draw()
 	progressButton:draw()
 	if ShowProgress then
 		love.graphics.setColor(0, 1, 0)
@@ -246,6 +271,8 @@ function love.draw()
 		currentButton = conveyorButton
 	elseif BuildSelection == CellType.JUNCTION then
 		currentButton = junctionButton
+	elseif BuildSelection == CellType.CORE then
+		currentButton = coreButton
 	end
 
 	if currentButton then
@@ -264,16 +291,41 @@ function love.draw()
 		0,
 		Height - Font:getHeight()
 	)
+
+	local index = 0
+	for name, amount in pairs(Core) do
+		if type(amount) == "function" then
+			goto continue
+		end
+		love.graphics.print(("%s: %d"):format(name, amount), 48 * 5 + 2, Font:getHeight() * index)
+		index = index + 1
+		::continue::
+	end
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
 function love.mousepressed(mouseX, mouseY, button)
-	generatorButton:update()
-	conveyorButton:update()
-	junctionButton:update()
-	progressButton:update()
-	loadButton:update()
-	saveButton:update()
+	if generatorButton:update() then
+		return
+	end
+	if conveyorButton:update() then
+		return
+	end
+	if junctionButton:update() then
+		return
+	end
+	if coreButton:update() then
+		return
+	end
+	if progressButton:update() then
+		return
+	end
+	if loadButton:update() then
+		return
+	end
+	if saveButton:update() then
+		return
+	end
 
 	if button > 2 then
 		return
@@ -284,7 +336,7 @@ function love.mousepressed(mouseX, mouseY, button)
 	local a = math.ceil(x / CellSize)
 	local b = math.ceil(y / CellSize)
 
-	if a > CellAmount or b > CellAmount or a <= 0 or b <= 0 or mouseY <= 48 then
+	if a > CellAmount or b > CellAmount or a <= 0 or b <= 0 then
 		return
 	end
 
@@ -303,10 +355,18 @@ function love.mousepressed(mouseX, mouseY, button)
 		elseif BuildSelection == CellType.JUNCTION then
 			Cells[a][b].content.name = DEFAULT_CONTENT_NAME
 			Cells[a][b].type = CellType.JUNCTION
+		elseif BuildSelection == CellType.CORE and not corePlased then
+			Cells[a][b].content.name = DEFAULT_CONTENT_NAME
+			Cells[a][b].content.amount = 0
+			Cells[a][b].type = CellType.CORE
+			corePlased = true
 		end
 	end
 
 	if iserase and Cells[a][b].type ~= CellType.ORE then
+		if Cells[a][b].type == CellType.CORE then
+			corePlased = false
+		end
 		Cells[a][b].type = CellType.NONE
 	end
 
@@ -342,6 +402,8 @@ function love.keypressed(key)
 		BuildSelection = CellType.CONVEYOR
 	elseif key == "3" then
 		BuildSelection = CellType.JUNCTION
+	elseif key == "4" then
+		BuildSelection = CellType.CORE
 	elseif key == "p" then
 		saveGame()
 	elseif key == "l" then
