@@ -248,7 +248,6 @@ function Cell:new(x, y, type, direction, content, under)
 
 		if
 			not dstCell
-			or not dstCell.isStorage
 			or (not dstCell.isStorage and dstCell.type ~= CellType.CORE)
 			or self:storageCapacity() == 0
 			or dstCell:isStorageFull()
