@@ -102,22 +102,23 @@ function Cell:new(x, y, type, direction, content, under)
 	--- In seconds
 	local conveyorTime = 1
 
-	-- function public:detectStorageSpecs()
-	-- 	for _, v in pairs(StorageCellTypes) do
-	-- 		if v == type then
-	-- 			self.isStorage = true
-	-- 			break
-	-- 		end
-	-- 	end
-	--
-	-- 	if not self.isStorage then
-	-- 		self.maxCap = 0
-	-- 	end
-	-- 	assert(#StorageCellTypes == 1, "Unhadled storage cell types")
-	-- 	if self.type == CellType.CONVEYOR then
-	-- 		return 3
-	-- 	end
-	-- end
+	function public:detectStorageSpecs()
+		self.isStorage = false
+		self.maxCap = 0
+
+		for _, v in pairs(StorageCellTypes) do
+			if v == self.type then
+				self.isStorage = true
+				goto skip
+			end
+		end
+		::skip::
+
+		assert(#StorageCellTypes == 1, "Unhadled storage cell types")
+		if self.type == CellType.CONVEYOR then
+			self.maxCap = 3
+		end
+	end
 
 	--- Get reference to a cell positioned at `relX` and `relY` relatively to `self` cell
 	---@param relX? integer
@@ -350,14 +351,11 @@ function Cell:new(x, y, type, direction, content, under)
 	end
 
 	function public:update(dt)
-		self.isStorage = false
-		self.maxCap = 0
+		self:detectStorageSpecs()
 
 		if self.type == CellType.GENERATOR then
 			self:updateGenerator(dt)
 		elseif self.type == CellType.CONVEYOR then
-			self.isStorage = true
-			self.maxCap = 3
 			self:updateConveyor(dt)
 		elseif self.type == CellType.JUNCTION then
 			self:updateJunction(dt)
