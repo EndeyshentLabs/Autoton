@@ -109,10 +109,9 @@ function Cell:new(x, y, type, direction, content, under)
 		for _, v in pairs(StorageCellTypes) do
 			if v == self.type then
 				self.isStorage = true
-				goto skip
+				break
 			end
 		end
-		::skip::
 
 		assert(#StorageCellTypes == 1, "Unhadled storage cell types")
 		if self.type == CellType.CONVEYOR then
