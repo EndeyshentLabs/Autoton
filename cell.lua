@@ -60,6 +60,11 @@ protectEnum(Direction)
 ---@field update function
 ---@field draw function
 ---@field isStorage number
+---@field isStorageFull function
+---@field isStorageOverflowed function
+---@field addToStorage function
+---@field removeFromStorage function
+---@field transferStorage function
 ---@field storage table<Content>
 Cell = {}
 
