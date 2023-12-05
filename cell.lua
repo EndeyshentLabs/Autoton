@@ -259,9 +259,11 @@ function Cell:new(x, y, type, direction, content, under)
 
 		local updated = false
 		if dstCell.type == CellType.CORE and self.progress >= 100 then
-			Core:add(self.content)
+			for n, a in pairs(self.storage) do
+				Core:add(Content:new(n, a))
+			end
 
-			self.content = Content:new()
+			self.storage = {}
 
 			updated = true
 		elseif
@@ -327,6 +329,8 @@ function Cell:new(x, y, type, direction, content, under)
 			self:updateConveyor(dt)
 		elseif self.type == CellType.JUNCTION then
 			self:updateJunction(dt)
+		elseif self.type == CellType.CORE then
+			self.maxCap = 1337
 		elseif self.type == CellType.ORE or self.type == CellType.NONE then
 			if self.progress ~= 0 then
 				self.progress = 0
