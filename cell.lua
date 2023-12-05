@@ -280,76 +280,41 @@ function Cell:new(x, y, type, direction, content, under)
 
 	---@diagnostic disable-next-line: unused-local
 	function public:updateJunction(dt)
-		local inputOffset = {}
-		inputOffset.x = 0
-		inputOffset.y = 0
+		local inputX = nil
+		local inputY = nil
+		local inputOffsetX = 0
+		local inputOffsetY = 0
 
-		if self.x - 1 > 0 and self.x + 1 <= CellAmount then
-			if self:lookup(-1).type == CellType.CONVEYOR and self:lookup(-1).direction == Direction.RIGHT then
-				inputOffset.x = -1
-			elseif self:lookup(1).type == CellType.CONVEYOR and self:lookup(1).direction == Direction.LEFT then
-				inputOffset.x = 1
-			else
-				goto next
-			end
-
-			local outputCell = self:lookup(-inputOffset.x)
-			if not outputCell or outputCell.type ~= CellType.CONVEYOR then
-				goto next
-			end
-
-			if inputOffset.x ~= 0 then
-				local inputCell = self:lookup(inputOffset.x)
-				if not inputCell or inputCell.content.name == DEFAULT_CONTENT_NAME then
-					goto next
-				end
-
-				if
-					(inputCell and outputCell)
-					and (
-						inputCell.content.name == outputCell.content.name
-						or outputCell.content.name == DEFAULT_CONTENT_NAME
-					)
-				then
-					outputCell.content.name = inputCell.content.name
-					outputCell.content.amount = outputCell.content.amount + inputCell.content.amount
-					inputCell.content.amount = 0
-					inputCell.content.name = DEFAULT_CONTENT_NAME
-				end
-			end
+		if self:lookup(-1).type == CellType.CONVEYOR and self:lookup(-1).direction == Direction.RIGHT then
+			inputX = self:lookup(-1)
+			inputOffsetX = -1
+		elseif self:lookup(1).type == CellType.CONVEYOR and self:lookup(1).direction == Direction.LEFT then
+			inputX = self:lookup(1)
+			inputOffsetX = 1
 		end
 
-		::next::
+		if self:lookup(0, -1).type == CellType.CONVEYOR and self:lookup(0, -1).direction == Direction.DOWN then
+			inputY = self:lookup(0, -1)
+			inputOffsetY = -1
+		elseif self:lookup(0, 1).type == CellType.CONVEYOR and self:lookup(0, 1).direction == Direction.UP then
+			inputY = self:lookup(0, 1)
+			inputOffsetY = 1
+		end
 
-		if self.y - 1 > 0 and self.y + 1 <= CellAmount then
-			if self:lookup(0, -1).type == CellType.CONVEYOR and self:lookup(0, -1).direction == Direction.DOWN then
-				inputOffset.y = -1
-			elseif self:lookup(0, 1).type == CellType.CONVEYOR and self:lookup(0, 1).direction == Direction.UP then
-				inputOffset.y = 1
-			else
-				return
-			end
+		local dstX = nil
+		local dstY = nil
+		if inputOffsetX ~= 0 then
+			dstX = self:lookup(inputOffsetX * -1)
+		end
+		if inputOffsetY ~= 0 then
+			dstY = self:lookup(0, inputOffsetY * -1)
+		end
 
-			local outputCell = self:lookup(0, -inputOffset.y)
-			if not outputCell or outputCell.type ~= CellType.CONVEYOR then
-				return
-			end
-
-			if inputOffset.y ~= 0 then
-				local inputCell = self:lookup(0, inputOffset.y)
-				if
-					(inputCell and outputCell)
-					and (
-						inputCell.content.name == outputCell.content.name
-						or outputCell.content.name == DEFAULT_CONTENT_NAME
-					)
-				then
-					outputCell.content.name = inputCell.content.name
-					outputCell.content.amount = outputCell.content.amount + inputCell.content.amount
-					inputCell.content.amount = 0
-					inputCell.content.name = DEFAULT_CONTENT_NAME
-				end
-			end
+		if inputX and dstX and dstX.isStorage and not dstX:isStorageFull() then
+			inputX:transferStorage(dstX)
+		end
+		if inputY and dstY and dstY.isStorage and not dstY:isStorageFull() then
+			inputY:transferStorage(dstY)
 		end
 	end
 
