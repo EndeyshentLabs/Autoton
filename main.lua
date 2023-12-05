@@ -376,12 +376,22 @@ function love.mousepressed(mouseX, mouseY, button)
 	end
 	Cells[a][b].content.amount = 0
 	Cells[a][b].progress = 0
+	Cells[a][b].storage = {}
+	Cells[a][b].isStorage = false
+	Cells[a][b].maxCap = 0
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
 function love.keypressed(key)
 	if key == "space" then
-		dumpMap()
+		local x = love.mouse.getX() - Width / 2 + CameraX
+		local y = love.mouse.getY() - Height / 2 + CameraY
+		local a = math.ceil(x / CellSize)
+		local b = math.ceil(y / CellSize)
+
+		for k, v in pairs(Cells[a][b].storage) do
+			print(k, v)
+		end
 	elseif key == "r" then
 		if love.keyboard.isDown("lshift") then
 			if Rotation == 0 then
