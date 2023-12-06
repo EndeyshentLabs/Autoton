@@ -65,7 +65,7 @@ protectEnum(Direction)
 ---@field addToStorage function
 ---@field removeFromStorage function
 ---@field transferStorage function
----@field storage table<Content>
+---@field storage table<ContentType, integer>
 Cell = {}
 
 ---Cell class constructor
@@ -95,7 +95,7 @@ function Cell:new(x, y, type, direction, content, under)
 	--- In percents
 	---@type number
 	public.progress = 0
-	---@type table<Content>
+	---@type table<ContentType, integer>
 	public.storage = {}
 	---@type number
 	public.maxCap = 0
@@ -185,7 +185,7 @@ function Cell:new(x, y, type, direction, content, under)
 
 	---Removes or clears the storage
 	---@param contentType ContentType?
-	---@return Content|table<Content>
+	---@return integer|table<ContentType, integer>
 	function public:removeFromStorage(contentType)
 		if contentType ~= nil and self.storage[contentType] ~= nil then
 			local savedContent = self.storage[contentType]
@@ -201,7 +201,7 @@ function Cell:new(x, y, type, direction, content, under)
 	end
 
 	---Adds content to the storage
-	---@param cont Content|table<Content>
+	---@param cont Content|table<ContentType, integer>
 	function public:addToStorage(cont)
 		if public:isStorageFull() then
 			return
