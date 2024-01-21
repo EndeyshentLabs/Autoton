@@ -12,6 +12,7 @@ CellType = {
 	JUNCTION = 3,
 	ORE = 4,
 	CORE = 5,
+	STORAGE = 6,
 }
 
 function CellType.tostring(cellType)
@@ -23,6 +24,8 @@ function CellType.tostring(cellType)
 		return "JUNCTION"
 	elseif cellType == CellType.ORE then
 		return "ORE"
+	elseif cellType == CellType.STORAGE then
+		return "STORAGE"
 	elseif cellType == CellType.CORE then
 		return "CORE"
 	elseif cellType == CellType.NONE then
@@ -31,6 +34,14 @@ function CellType.tostring(cellType)
 end
 
 protectEnum(CellType)
+
+---@enum StorageCellTypes
+StorageCellTypes = {
+	CellType.CONVEYOR,
+	CellType.STORAGE,
+}
+
+protectEnum(StorageCellTypes)
 
 ---@enum Direction
 Direction = {
@@ -52,6 +63,13 @@ protectEnum(Direction)
 ---@field under Cell|nil
 ---@field update function
 ---@field draw function
+---@field isStorage number
+---@field isStorageFull function
+---@field isStorageOverflowed function
+---@field addToStorage function
+---@field removeFromStorage function
+---@field transferStorage function
+---@field storage table<ContentType, integer>
 Cell = {}
 
 ---Cell class constructor
@@ -64,20 +82,53 @@ Cell = {}
 ---@return Cell
 function Cell:new(x, y, type, direction, content, under)
 	local public = {}
+	---@type integer
 	public.x = x
+	---@type integer
 	public.y = y
+	---@type CellType
 	public.type = type
+	---@type Direction
 	public.direction = direction or Direction.RIGHT
+	---@type Content
 	public.content = content or Content:new()
+	---@type Cell?
 	public.under = under
+	---@type boolean
+	public.isStorage = false
 	--- In percents
+	---@type number
 	public.progress = 0
+	---@type table<ContentType, integer>
+	public.storage = {}
+	---@type number
+	public.maxCap = 0
 
-	--- cellTime - how long would it take for block to do something (in secs)
+	-- cellTime - how long would it take for block to do something (in secs)
+
 	--- In seconds
 	local generatorTime = 2
 	--- In seconds
 	local conveyorTime = 1
+
+	function public:detectStorageSpecs()
+		self.isStorage = false
+		self.maxCap = 0
+
+		for _, v in pairs(StorageCellTypes) do
+			if v == self.type then
+				self.isStorage = true
+				break
+			end
+		end
+
+		assert(#StorageCellTypes == 2, "Unhadled storage cell types")
+		if self.type == CellType.CONVEYOR then
+			self.maxCap = 3
+		elseif self.type == CellType.STORAGE then
+			self.maxCap = 192
+		end
+	end
 
 	--- Get reference to a cell positioned at `relX` and `relY` relatively to `self` cell
 	---@param relX? integer
@@ -96,7 +147,8 @@ function Cell:new(x, y, type, direction, content, under)
 		local cellUnder = self:lookup(0, 1)
 		if
 			not cellUnder
-			or cellUnder.type ~= CellType.CONVEYOR
+			or not cellUnder.isStorage
+			or (cellUnder.isStorage and cellUnder:isStorageFull())
 			or not self.under
 			or self.under.content.name == DEFAULT_CONTENT_NAME
 		then
@@ -110,8 +162,7 @@ function Cell:new(x, y, type, direction, content, under)
 			(cellUnder.content.name == self.under.content.name or cellUnder.content.name == DEFAULT_CONTENT_NAME)
 			and self.progress >= 100
 		then
-			cellUnder.content.name = self.under.content.name
-			cellUnder.content.amount = cellUnder.content.amount + 1
+			cellUnder:addToStorage(Content:new(self.under.content.name, 1))
 
 			updated = true
 		end
@@ -121,12 +172,69 @@ function Cell:new(x, y, type, direction, content, under)
 		end
 	end
 
-	function public:updateConveyor(dt)
-		if self.content.amount <= 0 then
-			self.content.name = DEFAULT_CONTENT_NAME
-			return
+	---@return integer
+	function public:storageCapacity()
+		local n = 0
+		for _, v in pairs(self.storage) do
+			n = n + v
+		end
+		return n
+	end
+
+	function public:isStorageFull()
+		return self:storageCapacity() >= self.maxCap
+	end
+
+	function public:isStorageOverflowed()
+		return self:storageCapacity() > self.maxCap
+	end
+
+	---Removes or clears the storage
+	---@param contentType ContentType?
+	---@return integer|table<ContentType, integer>
+	function public:removeFromStorage(contentType)
+		if contentType ~= nil and self.storage[contentType] ~= nil then
+			local savedContent = self.storage[contentType]
+			return savedContent
 		end
 
+		local savedContent = {}
+		for k, v in pairs(self.storage) do
+			savedContent[k] = v
+		end
+		self.storage = {}
+		return savedContent
+	end
+
+	---Adds content to the storage
+	---@param cont Content|table<ContentType, integer>
+	function public:addToStorage(cont)
+		if public:isStorageFull() then
+			return
+		end
+		if cont.name or cont.amount then -- type(cont) == Content
+			local availableCap = self.maxCap - self:storageCapacity()
+			local willOverflow = availableCap - cont.amount < 0
+			if not willOverflow then
+				self.storage[cont.name] = (self.storage[cont.name] or 0) + cont.amount
+			else
+				self.storage[cont.name] = (self.storage[cont.name] or 0) + availableCap
+			end
+		else -- type(cont) == table<Content>
+			for k, v in pairs(cont) do
+				self:addToStorage(Content:new(k, v))
+			end
+		end
+	end
+
+	---Transfers self's content to other cell
+	---@param dst Cell
+	function public:transferStorage(dst)
+		local stored = self:removeFromStorage()
+		dst:addToStorage(stored)
+	end
+
+	function public:updateConveyor(dt)
 		local offset = { ["x"] = 0, ["y"] = 0 }
 
 		if self.direction == Direction.RIGHT then
@@ -146,9 +254,9 @@ function Cell:new(x, y, type, direction, content, under)
 
 		if
 			not dstCell
-			or (dstCell.type ~= CellType.CONVEYOR and dstCell.type ~= CellType.CORE)
-			or self.content.amount == 0
-			or (dstCell.content.name ~= self.content.name and dstCell.content.name ~= DEFAULT_CONTENT_NAME)
+			or (not dstCell.isStorage and dstCell.type ~= CellType.CORE)
+			or self:storageCapacity() == 0
+			or dstCell:isStorageFull()
 		then
 			return
 		end
@@ -157,27 +265,18 @@ function Cell:new(x, y, type, direction, content, under)
 
 		local updated = false
 		if dstCell.type == CellType.CORE and self.progress >= 100 then
-			Core:add(self.content)
+			for n, a in pairs(self.storage) do
+				Core:add(Content:new(n, a))
+			end
 
-			self.content = Content:new()
+			self.storage = {}
 
 			updated = true
 		elseif
-			(dstCell.content.name == self.content.name or dstCell.content.name == DEFAULT_CONTENT_NAME)
-			and self.progress >= 100
+			-- (dstCell.content.name == self.content.name or dstCell.content.name == DEFAULT_CONTENT_NAME)
+			not dstCell:isStorageFull() and self.progress >= 100
 		then
-			local sub = 3
-			dstCell.content.name = self.content.name
-
-			if self.content.amount < 3 then
-				sub = self.content.amount
-			end
-
-			assert(sub <= 3 and sub > 0, "0 < sub <= 3 (current " .. sub .. ")")
-
-			dstCell.content.amount = dstCell.content.amount + sub
-
-			self.content.amount = self.content.amount - sub
+			self:transferStorage(dstCell)
 
 			updated = true
 		end
@@ -189,86 +288,55 @@ function Cell:new(x, y, type, direction, content, under)
 
 	---@diagnostic disable-next-line: unused-local
 	function public:updateJunction(dt)
-		local inputOffset = {}
-		inputOffset.x = 0
-		inputOffset.y = 0
+		local inputX = nil
+		local inputY = nil
+		local inputOffsetX = 0
+		local inputOffsetY = 0
 
-		if self.x - 1 > 0 and self.x + 1 <= CellAmount then
-			if self:lookup(-1).type == CellType.CONVEYOR and self:lookup(-1).direction == Direction.RIGHT then
-				inputOffset.x = -1
-			elseif self:lookup(1).type == CellType.CONVEYOR and self:lookup(1).direction == Direction.LEFT then
-				inputOffset.x = 1
-			else
-				goto next
-			end
-
-			local outputCell = self:lookup(-inputOffset.x)
-			if not outputCell or outputCell.type ~= CellType.CONVEYOR then
-				goto next
-			end
-
-			if inputOffset.x ~= 0 then
-				local inputCell = self:lookup(inputOffset.x)
-				if not inputCell or inputCell.content.name == DEFAULT_CONTENT_NAME then
-					goto next
-				end
-
-				if
-					(inputCell and outputCell)
-					and (
-						inputCell.content.name == outputCell.content.name
-						or outputCell.content.name == DEFAULT_CONTENT_NAME
-					)
-				then
-					outputCell.content.name = inputCell.content.name
-					outputCell.content.amount = outputCell.content.amount + inputCell.content.amount
-					inputCell.content.amount = 0
-					inputCell.content.name = DEFAULT_CONTENT_NAME
-				end
-			end
+		if self:lookup(-1).type == CellType.CONVEYOR and self:lookup(-1).direction == Direction.RIGHT then
+			inputX = self:lookup(-1)
+			inputOffsetX = -1
+		elseif self:lookup(1).type == CellType.CONVEYOR and self:lookup(1).direction == Direction.LEFT then
+			inputX = self:lookup(1)
+			inputOffsetX = 1
 		end
 
-		::next::
+		if self:lookup(0, -1).type == CellType.CONVEYOR and self:lookup(0, -1).direction == Direction.DOWN then
+			inputY = self:lookup(0, -1)
+			inputOffsetY = -1
+		elseif self:lookup(0, 1).type == CellType.CONVEYOR and self:lookup(0, 1).direction == Direction.UP then
+			inputY = self:lookup(0, 1)
+			inputOffsetY = 1
+		end
 
-		if self.y - 1 > 0 and self.y + 1 <= CellAmount then
-			if self:lookup(0, -1).type == CellType.CONVEYOR and self:lookup(0, -1).direction == Direction.DOWN then
-				inputOffset.y = -1
-			elseif self:lookup(0, 1).type == CellType.CONVEYOR and self:lookup(0, 1).direction == Direction.UP then
-				inputOffset.y = 1
-			else
-				return
-			end
+		local dstX = nil
+		local dstY = nil
+		if inputOffsetX ~= 0 then
+			dstX = self:lookup(inputOffsetX * -1)
+		end
+		if inputOffsetY ~= 0 then
+			dstY = self:lookup(0, inputOffsetY * -1)
+		end
 
-			local outputCell = self:lookup(0, -inputOffset.y)
-			if not outputCell or outputCell.type ~= CellType.CONVEYOR then
-				return
-			end
-
-			if inputOffset.y ~= 0 then
-				local inputCell = self:lookup(0, inputOffset.y)
-				if
-					(inputCell and outputCell)
-					and (
-						inputCell.content.name == outputCell.content.name
-						or outputCell.content.name == DEFAULT_CONTENT_NAME
-					)
-				then
-					outputCell.content.name = inputCell.content.name
-					outputCell.content.amount = outputCell.content.amount + inputCell.content.amount
-					inputCell.content.amount = 0
-					inputCell.content.name = DEFAULT_CONTENT_NAME
-				end
-			end
+		if inputX and dstX and dstX.isStorage and not dstX:isStorageFull() then
+			inputX:transferStorage(dstX)
+		end
+		if inputY and dstY and dstY.isStorage and not dstY:isStorageFull() then
+			inputY:transferStorage(dstY)
 		end
 	end
 
 	function public:update(dt)
+		self:detectStorageSpecs()
+
 		if self.type == CellType.GENERATOR then
 			self:updateGenerator(dt)
 		elseif self.type == CellType.CONVEYOR then
 			self:updateConveyor(dt)
 		elseif self.type == CellType.JUNCTION then
 			self:updateJunction(dt)
+		elseif self.type == CellType.CORE then
+			self.maxCap = 1337
 		elseif self.type == CellType.ORE or self.type == CellType.NONE then
 			if self.progress ~= 0 then
 				self.progress = 0
@@ -297,7 +365,7 @@ function Cell:new(x, y, type, direction, content, under)
 		end
 
 		love.graphics.print(
-			("%s\n%d\n%d%%"):format(self.content.name, self.content.amount, self.progress),
+			("%s\n%d\n%d%%"):format(self.content.name, self:storageCapacity(), self.progress),
 			(self.x - 1) * CellSize + 1,
 			(self.y - 1) * CellSize + 1
 		)
@@ -330,6 +398,8 @@ function imageFromCell(cell)
 		return Images.junction
 	elseif type == CellType.GENERATOR then
 		return Images.generator
+	elseif type == CellType.STORAGE then
+		return Images.storage
 	elseif type == CellType.CORE then
 		return Images.core
 	elseif type == CellType.ORE then

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 33.866666 33.866666"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25)"
+   sodipodi:docname="storage.svg"
+   inkscape:export-filename="storage.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#505050"
+     bordercolor="#ffffff"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:deskcolor="#505050"
+     inkscape:document-units="px"
+     inkscape:zoom="2.2093154"
+     inkscape:cx="16.294641"
+     inkscape:cy="20.368301"
+     inkscape:window-width="1596"
+     inkscape:window-height="866"
+     inkscape:window-x="0"
+     inkscape:window-y="30"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#008000;stroke-width:33.8667;stroke-miterlimit:38"
+       id="rect1"
+       width="33.866665"
+       height="33.866665"
+       x="0"
+       y="0" />
+    <path
+       id="path4"
+       style="fill:#55ddff;stroke-width:33.8667;stroke-miterlimit:38"
+       inkscape:transform-center-x="-1.4106947"
+       d="M -8.4669894 -14.664791 C -7.9589715 -14.738111 43.35124 -7.3326188 42.335204 -7.3326188 C 41.319169 -7.3326188 92.62938 -14.738111 93.137398 -14.664791 C 93.645416 -14.591471 -8.9750073 -14.591471 -8.4669894 -14.664791 z M -8.4669894 -14.664791 C -8.2129899 -14.811438 -8.2129899 14.811439 -8.4669894 14.664793 C -8.7209888 14.518146 16.933332 -0.29329247 16.933332 8.6605746e-07 C 16.933332 0.2932942 -8.7209888 -14.518144 -8.4669894 -14.664791 z M -8.4669894 14.664793 C -8.975007 14.591472 93.645416 14.591472 93.137398 14.664793 C 92.629381 14.738113 41.319169 7.3326205 42.335204 7.3326205 C 43.35124 7.3326205 -7.9589718 14.738113 -8.4669894 14.664793 z M 93.137398 14.664793 C 92.8834 14.811439 92.8834 -14.811437 93.137398 -14.664791 C 93.3914 -14.518144 67.737077 0.2932944 67.737077 8.6605746e-07 C 67.737077 -0.29329266 93.3914 14.518146 93.137398 14.664793 z "
+       transform="matrix(0.33330876,0,0,1.1546578,2.8226385,16.933332)" />
+  </g>
+</svg>
