@@ -1,5 +1,6 @@
 Width = love.graphics.getWidth()
 Height = love.graphics.getHeight()
+Images = {}
 
 local camera = require("lib.hump.camera")
 
@@ -8,19 +9,17 @@ CameraX = 0
 CameraY = 0
 
 require("gameinfo")
-
 require("args")
 require("utils")
+require("content")
 require("cell")
+require("registry")
+require("gamebuilder")
 require("mapgen")
-
 require("settings")
-
 require("ui")
 require("core")
-
 require("buttons")
-
 require("gamedraw")
 
 ---@diagnostic disable-next-line: duplicate-set-field
@@ -30,18 +29,10 @@ function love.load()
 	Camera = camera()
 	Font = love.graphics.newFont("res/fonts/fira.ttf", 15)
 
-	Images = {}
 	Images.ohno = love.graphics.newImage("res/gfx/ohno.png")
-	Images.conveyor = love.graphics.newImage("res/gfx/conveyor.png")
-	Images.junction = love.graphics.newImage("res/gfx/junction.png")
-	Images.generator = love.graphics.newImage("res/gfx/generator.png")
-	Images.storage = love.graphics.newImage("res/gfx/storage.png")
-	Images.ore_iron = love.graphics.newImage("res/gfx/ore-iron.png")
-	Images.ore_gold = love.graphics.newImage("res/gfx/ore-gold.png")
 	Images.load = love.graphics.newImage("res/gfx/load.png")
 	Images.save = love.graphics.newImage("res/gfx/save.png")
 	Images.show_progress = love.graphics.newImage("res/gfx/show-progress.png")
-	Images.core = love.graphics.newImage("res/gfx/core.png")
 
 	InitButtons()
 
@@ -123,7 +114,7 @@ function love.mousepressed(mouseX, mouseY, button)
 	print(("Mouse %d: %d, %d"):format(button, a, b))
 
 	local under =
-		Cell:new(a, b, Cells[a][b].type, nil, Content:new(Cells[a][b].content.name, Cells[a][b].content.amount))
+		Cell:new(a, b, Cells[a][b].type, nil, Content:new(Cells[a][b].content.opts, Cells[a][b].content.amount))
 	local iserase = button == 2
 
 	if not iserase then
@@ -131,8 +122,9 @@ function love.mousepressed(mouseX, mouseY, button)
 			goto exit
 		end
 
-		Cells[a][b].content.name = DEFAULT_CONTENT_NAME
+		Cells[a][b].content.opts = DEFAULT_CONTENT_TYPE
 		Cells[a][b].content.amount = 0
+		Cells[a][b].direction = Rotation
 		Cells[a][b].type = BuildSelection
 
 		::exit::
@@ -145,15 +137,12 @@ function love.mousepressed(mouseX, mouseY, button)
 		Cells[a][b].type = CellType.NONE
 	end
 
-	Cells[a][b].direction = Rotation
 	if not iserase and not Cells[a][b].under then
 		Cells[a][b].under = under
 	end
 	Cells[a][b].content.amount = 0
 	Cells[a][b].progress = 0
 	Cells[a][b].storage = {}
-	Cells[a][b].isStorage = false
-	Cells[a][b].maxCap = 0
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
@@ -184,10 +173,12 @@ function love.keypressed(key)
 	elseif string.byte(key, 1, 1) >= string.byte("1", 1, 1) and string.byte(key, 1, 1) <= string.byte("9", 1, 1) then
 		local num = string.byte(key, 1, 1) - 48
 		if num <= #BuildableCellTypes then
-			BuildSelection = num
+			BuildSelection = BuildableCellTypes[num]
+			BuildSelectionNum = num
 		end
 	elseif key == "q" then
 		BuildSelection = CellType.NONE
+			BuildSelectionNum = 0
 	elseif key == "p" then
 		saveGame()
 	elseif key == "l" then
@@ -196,6 +187,8 @@ function love.keypressed(key)
 		MapReady = false
 		GenerateMap()
 		MapReady = true
+	elseif key == "f9" and IsDebug then
+		debug.debug()
 	end
 end
 

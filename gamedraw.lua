@@ -34,7 +34,7 @@ function DrawGame()
 	local b = math.ceil((love.mouse.getY() - (Height / 2) + CameraY) / CellSize)
 
 	---@diagnostic disable-next-line: missing-fields
-	local previewImage = imageFromCell({ type = BuildSelection })
+	local previewImage = ImageFromCell({ type = BuildSelection })
 
 	if previewImage then
 		local previewOffsetX = 0
@@ -76,7 +76,7 @@ function DrawOverlay()
 
 	if BuildSelection ~= CellType.NONE then
 		love.graphics.setColor(0, 1, 0)
-		love.graphics.rectangle("line", BuildSelection * ButtonSize - ButtonSize, 0, ButtonSize, ButtonSize)
+		love.graphics.rectangle("line", BuildSelectionNum * ButtonSize - ButtonSize, 0, ButtonSize, ButtonSize)
 	end
 
 	love.graphics.setColor(1, 1, 1)

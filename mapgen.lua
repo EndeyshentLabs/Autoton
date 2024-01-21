@@ -18,20 +18,18 @@ function GenerateMap()
 		Cells[x] = {}
 
 		for y = 1, CellAmount, 1 do
-			---@type CellType
 			local type = CellType.NONE
-			---@type ContentType
-			local contentName = DEFAULT_CONTENT_NAME
+			local contentName = DEFAULT_CONTENT_TYPE
 
-			if oreGrid[x][y] > OreContentSpawnRates["iron"] then
+			if oreGrid[x][y] > OreContentSpawnRates["AUTOTON::oreIron"] then
 				type = CellType.ORE
-				contentName = ContentType.IRON -- NOTE: Coal would be better
-			elseif oreGrid[x][y] < OreContentSpawnRates["gold"] then
+				contentName = GameBuilder.contentTypes.oreIron
+			elseif oreGrid[x][y] < OreContentSpawnRates["AUTOTON::oreGold"] then
 				type = CellType.ORE
-				contentName = ContentType.GOLD
+				contentName = GameBuilder.contentTypes.oreGold
 			end
 
-			Cells[x][y] = Cell:new(x, y, type, nil, Content:new(contentName))
+			Cells[x][y] = Cell:new(x, y, type, Direction.RIGHT, Content:new(contentName))
 		end
 	end
 

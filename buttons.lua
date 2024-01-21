@@ -11,7 +11,7 @@ function InitButtons()
 				0,
 				ButtonSize,
 				ButtonSize,
-				imageFromCell({ type = v }),
+				ImageFromCell({ type = v }),
 				function()
 					BuildSelection = v
 				end

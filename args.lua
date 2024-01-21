@@ -5,6 +5,14 @@ Args = {
 			IsDebug = true
 
 			love.window.setTitle(love.window.getTitle() .. " (DEBUG)")
+		end,
+	},
+	["debug-ui"] = {
+		---@diagnostic disable-next-line: unused-local
+		callback = function(pos)
+			IsDebug = true
+
+			love.window.setTitle(love.window.getTitle() .. " (DEBUG)")
 
 			---@diagnostic disable-next-line: lowercase-global
 			vudu = require("lib.vudu.vudu")
