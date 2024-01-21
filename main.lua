@@ -118,7 +118,10 @@ function love.mousepressed(mouseX, mouseY, button)
 	local iserase = button == 2
 
 	if not iserase then
-		if BuildSelection == CellType.CORE and IsCorePlased then
+		if
+			(BuildSelection == GameBuilder.cellTypes.core and IsCorePlased)
+			or (BuildSelection == CellType.NONE and BuildSelectionNum == 0)
+		then
 			goto exit
 		end
 
@@ -131,7 +134,7 @@ function love.mousepressed(mouseX, mouseY, button)
 	end
 
 	if iserase and Cells[a][b].type ~= CellType.ORE then
-		if Cells[a][b].type == CellType.CORE then
+		if Cells[a][b].type == GameBuilder.cellTypes.core then
 			IsCorePlased = false
 		end
 		Cells[a][b].type = CellType.NONE
@@ -178,7 +181,7 @@ function love.keypressed(key)
 		end
 	elseif key == "q" then
 		BuildSelection = CellType.NONE
-			BuildSelectionNum = 0
+		BuildSelectionNum = 0
 	elseif key == "p" then
 		saveGame()
 	elseif key == "l" then
