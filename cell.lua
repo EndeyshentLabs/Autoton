@@ -12,6 +12,7 @@ CellType = {
 	JUNCTION = 3,
 	ORE = 4,
 	CORE = 5,
+	STORAGE = 6,
 }
 
 function CellType.tostring(cellType)
@@ -23,6 +24,8 @@ function CellType.tostring(cellType)
 		return "JUNCTION"
 	elseif cellType == CellType.ORE then
 		return "ORE"
+	elseif cellType == CellType.STORAGE then
+		return "STORAGE"
 	elseif cellType == CellType.CORE then
 		return "CORE"
 	elseif cellType == CellType.NONE then
@@ -35,6 +38,7 @@ protectEnum(CellType)
 ---@enum StorageCellTypes
 StorageCellTypes = {
 	CellType.CONVEYOR,
+	CellType.STORAGE,
 }
 
 protectEnum(StorageCellTypes)
@@ -118,9 +122,11 @@ function Cell:new(x, y, type, direction, content, under)
 			end
 		end
 
-		assert(#StorageCellTypes == 1, "Unhadled storage cell types")
+		assert(#StorageCellTypes == 2, "Unhadled storage cell types")
 		if self.type == CellType.CONVEYOR then
 			self.maxCap = 3
+		elseif self.type == CellType.STORAGE then
+			self.maxCap = 192
 		end
 	end
 
@@ -392,6 +398,8 @@ function imageFromCell(cell)
 		return Images.junction
 	elseif type == CellType.GENERATOR then
 		return Images.generator
+	elseif type == CellType.STORAGE then
+		return Images.storage
 	elseif type == CellType.CORE then
 		return Images.core
 	elseif type == CellType.ORE then

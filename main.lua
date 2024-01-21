@@ -38,6 +38,8 @@ local conveyorButton = nil
 ---@type ImageButton
 local junctionButton = nil
 ---@type ImageButton
+local storageButton = nil
+---@type ImageButton
 local coreButton = nil
 ---@type ImageButton
 local progressButton = nil
@@ -124,6 +126,7 @@ function love.load()
 	Images.conveyor = love.graphics.newImage("res/gfx/conveyor.png")
 	Images.junction = love.graphics.newImage("res/gfx/junction.png")
 	Images.generator = love.graphics.newImage("res/gfx/generator.png")
+	Images.storage = love.graphics.newImage("res/gfx/storage.png")
 	Images.ore_iron = love.graphics.newImage("res/gfx/ore-iron.png")
 	Images.ore_gold = love.graphics.newImage("res/gfx/ore-gold.png")
 	Images.load = love.graphics.newImage("res/gfx/load.png")
@@ -140,7 +143,10 @@ function love.load()
 	junctionButton = ImageButton:new(48 * 2, 0, 48, 48, Images.junction, function()
 		BuildSelection = CellType.JUNCTION
 	end)
-	coreButton = ImageButton:new(48 * 3, 0, 48, 48, Images.core, function()
+	storageButton = ImageButton:new(48 * 3, 0, 48, 48, Images.storage, function()
+		BuildSelection = CellType.STORAGE
+	end)
+	coreButton = ImageButton:new(48 * 4, 0, 48, 48, Images.core, function()
 		BuildSelection = CellType.CORE
 	end)
 	progressButton = ImageButton:new(Width - 48, 0, 48, 48, Images.show_progress, function()
@@ -253,6 +259,7 @@ function love.draw()
 	generatorButton:draw()
 	conveyorButton:draw()
 	junctionButton:draw()
+	storageButton:draw()
 	coreButton:draw()
 	progressButton:draw()
 	if ShowProgress then
@@ -271,6 +278,8 @@ function love.draw()
 		currentButton = conveyorButton
 	elseif BuildSelection == CellType.JUNCTION then
 		currentButton = junctionButton
+	elseif BuildSelection == CellType.STORAGE then
+		currentButton = storageButton
 	elseif BuildSelection == CellType.CORE then
 		currentButton = coreButton
 	end
@@ -295,11 +304,11 @@ function love.draw()
 	local index = 0
 	for name, amount in pairs(Core) do
 		if type(amount) == "function" then
-			goto continue
+			goto continue3
 		end
 		love.graphics.print(("%s: %d"):format(name, amount), 48 * 5 + 2, Font:getHeight() * index)
 		index = index + 1
-		::continue::
+		::continue3::
 	end
 end
 
@@ -312,6 +321,9 @@ function love.mousepressed(mouseX, mouseY, button)
 		return
 	end
 	if junctionButton:update() then
+		return
+	end
+	if storageButton:update() then
 		return
 	end
 	if coreButton:update() then
@@ -355,6 +367,9 @@ function love.mousepressed(mouseX, mouseY, button)
 		elseif BuildSelection == CellType.JUNCTION then
 			Cells[a][b].content.name = DEFAULT_CONTENT_NAME
 			Cells[a][b].type = CellType.JUNCTION
+		elseif BuildSelection == CellType.STORAGE then
+			Cells[a][b].content.name = DEFAULT_CONTENT_NAME
+			Cells[a][b].type = CellType.STORAGE
 		elseif BuildSelection == CellType.CORE and not corePlased then
 			Cells[a][b].content.name = DEFAULT_CONTENT_NAME
 			Cells[a][b].content.amount = 0
@@ -413,6 +428,8 @@ function love.keypressed(key)
 	elseif key == "3" then
 		BuildSelection = CellType.JUNCTION
 	elseif key == "4" then
+		BuildSelection = CellType.STORAGE
+	elseif key == "5" then
 		BuildSelection = CellType.CORE
 	elseif key == "p" then
 		saveGame()
