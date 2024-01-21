@@ -6,13 +6,13 @@ CellSize = 64
 
 ---@enum CellType
 CellType = {
-	NONE = 0,
+	NONE = -1,
+	ORE = 0,
 	GENERATOR = 1,
 	CONVEYOR = 2,
 	JUNCTION = 3,
-	ORE = 4,
+	STORAGE = 4,
 	CORE = 5,
-	STORAGE = 6,
 }
 
 function CellType.tostring(cellType)
@@ -34,6 +34,18 @@ function CellType.tostring(cellType)
 end
 
 protectEnum(CellType)
+
+--- CellType that can be build ordered in toolbar order
+---@enum BuildableCellTypes
+BuildableCellTypes = {
+	CellType.GENERATOR,
+	CellType.CONVEYOR,
+	CellType.JUNCTION,
+	CellType.STORAGE,
+	CellType.CORE,
+}
+
+protectEnum(BuildableCellTypes)
 
 ---@enum StorageCellTypes
 StorageCellTypes = {

@@ -60,17 +60,6 @@ function setColorHEX(rgba)
 	love.graphics.setColor(love.math.colorFromBytes(rb, gb, bb, ab))
 end
 
----Checks, if game is running in debug mode(`--debug` flag)
----@return boolean
-function isDebug()
-	-- Debug flag need to be last flag!
-	if arg[#arg] == "-debug" or arg[#arg] == "--debug" then
-		return true
-	else
-		return false
-	end
-end
-
 function protectEnum(e)
 	setmetatable(e, {
 		__newindex = function()
