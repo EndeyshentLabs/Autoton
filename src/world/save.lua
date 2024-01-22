@@ -1,5 +1,3 @@
-require("cell")
-
 ---comment
 ---@param cell Cell
 ---@return integer|nil

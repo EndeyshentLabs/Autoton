@@ -2,28 +2,22 @@ Width = love.graphics.getWidth()
 Height = love.graphics.getHeight()
 Images = {}
 
+require("lib.30log")
+
 local camera = require("lib.hump.camera")
 
 Camera = nil
 CameraX = 0
 CameraY = 0
 
-require("gameinfo")
 require("args")
 require("utils")
-require("content")
-require("cell")
-require("registry")
-require("gamebuilder")
-require("mapgen")
-require("settings")
-require("ui")
-require("core")
-require("buttons")
-require("gamedraw")
 
 ---@diagnostic disable-next-line: duplicate-set-field
 function love.load()
+	require("src")
+
+	RequireAll()
 	ParseArgs()
 
 	Camera = camera()
@@ -88,6 +82,9 @@ function love.mousepressed(mouseX, mouseY, button)
 	if UpdateButtons() then
 		return
 	end
+	if mouseX < ButtonColumnCount * ButtonSize then
+		return
+	end
 	if saveButton:update() then
 		return
 	end
@@ -97,6 +94,7 @@ function love.mousepressed(mouseX, mouseY, button)
 	if progressButton:update() then
 		return
 	end
+
 
 	if button > 2 then
 		return
@@ -205,7 +203,6 @@ function love.resize()
 end
 
 function saveGame()
-	require("save")
 	local s = ("return ({{ playTime = %f, seed = %d, generation = %d }, {\n"):format(
 		PlayTime,
 		love.math.getRandomSeed(),

@@ -1,5 +1,3 @@
-local class = require("lib.30log")
-
 ---@class ImageButton
 ---@field x integer
 ---@field y integer

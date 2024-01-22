@@ -76,7 +76,7 @@ function DrawOverlay()
 
 	if BuildSelection ~= CellType.NONE then
 		love.graphics.setColor(0, 1, 0)
-		love.graphics.rectangle("line", BuildSelectionNum * ButtonSize - ButtonSize, 0, ButtonSize, ButtonSize)
+		love.graphics.rectangle("line", Buttons[BuildSelectionNum].x, Buttons[BuildSelectionNum].y, ButtonSize, ButtonSize)
 	end
 
 	love.graphics.setColor(1, 1, 1)

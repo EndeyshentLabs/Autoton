@@ -1,5 +1,4 @@
-local class = require("lib.30log")
-
+---@diagnostic disable: inject-field
 RESERVED_GAME_BASE = "AUTOTON"
 
 ---@class ContentBuilder
@@ -32,8 +31,11 @@ end
 ---@param name string New content's name
 ---@param opts ContentOpts Content opts
 function ContentBuilder:addContent(name, opts)
-	ContentType[self:basedName(name)] = opts
-	self.contentTypes[name] = ContentType[self:basedName(name)]
+	local basedName = self:basedName(name)
+
+	ContentType[basedName] = opts
+	ContentType[basedName]._BASED_NAME = basedName
+	self.contentTypes[name] = ContentType[basedName]
 end
 
 ---Load new image
@@ -41,17 +43,22 @@ end
 ---@param path string Path to image
 ---@return love.Image
 function ContentBuilder:addImage(name, path)
-	Images[self:basedName(name)] = love.graphics.newImage(path)
-	self.images[name] = Images[self:basedName(name)]
-	return Images[self:basedName(name)]
+	local basedName = self:basedName(name)
+
+	Images[basedName] = love.graphics.newImage(path)
+	self.images[name] = Images[basedName]
+	return Images[basedName]
 end
 
 ---Add new ContentType
 ---@param name string New content's name
 ---@param opts CellOpts Content opts
 function ContentBuilder:addCell(name, opts)
-	CellType[self:basedName(name)] = opts
-	self.cellTypes[name] = CellType[self:basedName(name)]
+	local basedName = self:basedName(name)
+
+	CellType[basedName] = opts
+	CellType[basedName]._BASED_NAME = basedName
+	self.cellTypes[name] = CellType[basedName]
 
 	if opts.buildable then
 		table.insert(BuildableCellTypes, self.cellTypes[name])

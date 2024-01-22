@@ -1,16 +1,18 @@
 Buttons = {}
 ButtonSize = 48
 
+ButtonColumnCount = 5
+
 function InitButtons()
 	for k, v in ipairs(BuildableCellTypes) do
-		---@diagnostic disable-next-line: missing-fields
 		table.insert(
 			Buttons,
 			ImageButton:new(
-				k * ButtonSize - ButtonSize,
-				0,
+				((k - 1) % ButtonColumnCount) * ButtonSize,
+				math.ceil(k / ButtonColumnCount) * ButtonSize - ButtonSize,
 				ButtonSize,
 				ButtonSize,
+				---@diagnostic disable-next-line: missing-fields
 				ImageFromCell({ type = v }),
 				function()
 					BuildSelection = v

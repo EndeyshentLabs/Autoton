@@ -1,5 +1,3 @@
-local class = require("lib.30log")
-
 Cells = {}
 
 CellSize = 64

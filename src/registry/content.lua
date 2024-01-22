@@ -1,5 +1,3 @@
-local class = require("lib.30log")
-
 ---@type table<string, ContentOpts>
 ContentType = {
 	["OH_NO"] = {
@@ -10,12 +8,6 @@ ContentType = {
 
 ---@type ContentOpts
 DEFAULT_CONTENT_TYPE = ContentType["OH_NO"]
-
----@enum OreContentSpawnRates
-OreContentSpawnRates = {
-	["AUTOTON::oreIron"] = 0.8,
-	["AUTOTON::oreGold"] = 0.1,
-}
 
 ---@class Content
 ---@field opts ContentOpts
