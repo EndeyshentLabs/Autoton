@@ -13,7 +13,7 @@ end
 baseMt = { __call = function (self,...) return self:new(...) end, __tostring = function(self,...)
 	if _instances[self] then return ("instance of '%s' (%s)"):format(rawget(self.class,'name') or '?', _instances[self]) end; return _classes[self] and ("class '%s' (%s)"):format(rawget(self,'name') or '?', _classes[self]) or self end
 }; _classes[baseMt] = tostring(baseMt); setmetatable(baseMt, {__tostring = baseMt.__tostring})
-local class = {isClass = function(t) return not not _classes[t] end, isInstance = function(t) return not not _instances[t] end}
+class = {isClass = function(t) return not not _classes[t] end, isInstance = function(t) return not not _instances[t] end}
 _class = function(name, attr) local c = deep_copy(attr); _classes[c] = tostring(c)
 	c.name, c.__tostring, c.__call, c.new, c.create, c.extend, c.__index, c.mixins, c.__instances, c.__subclasses = name or c.name, baseMt.__tostring, baseMt.__call, bind(instantiate, true), bind(instantiate, false), extend, c, setmetatable({},{__mode = 'k'}), setmetatable({},{__mode = 'k'}), setmetatable({},{__mode = 'k'})
 	c.subclasses = function(self, filter, ...) assert_call_from_class(self, 'subclasses(class)'); filter = filter or default_filter; local subclasses = {}; for class in pairs(_classes) do if class ~= baseMt and class:subclassOf(self) and filter(class,...) then subclasses[#subclasses + 1] = class end end; return subclasses end
