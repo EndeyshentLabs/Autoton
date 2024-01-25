@@ -13,11 +13,14 @@ GameBuilder:addContent("oreGold", {
 
 GameBuilder:addCell("miner", {
 	displayName = "Miner",
+	description = "Mines resources",
 	buildable = true,
 	time = 2,
 	image = GameBuilder:addImage("miner", "res/gfx/generator.png"),
 	drawable = true,
 	isStorage = false,
+	---@param self Cell
+	---@param dt number
 	update = function(self, dt)
 		local cellUnder = self:lookup(0, 1)
 		if
@@ -46,15 +49,16 @@ GameBuilder:addCell("miner", {
 
 GameBuilder:addCell("conveyor", {
 	displayName = "Conveyor",
+	description = ">Moving> resources",
 	buildable = true,
 	time = 1,
 	image = GameBuilder:addImage("conveyor", "res/gfx/conveyor.png"),
 	drawable = true,
 	isStorage = true,
 	maxCap = 3,
+	---@param self Cell
+	---@param dt number
 	update = function(self, dt)
-		-- TODO: Rewrite
-
 		local offset = { ["x"] = 0, ["y"] = 0 }
 
 		if self.direction == Direction.RIGHT then
@@ -101,10 +105,13 @@ GameBuilder:addCell("conveyor", {
 
 GameBuilder:addCell("junction", {
 	displayName = "Junction",
+	description = "Works like -|-",
 	buildable = true,
 	image = GameBuilder:addImage("junction", "res/gfx/junction.png"),
 	drawable = true,
 	isStorage = false,
+	---@param self Cell
+	---@param dt number
 	update = function(self, dt)
 		-- TODO: Rewrite
 
@@ -149,6 +156,7 @@ GameBuilder:addCell("junction", {
 
 GameBuilder:addCell("storage", {
 	displayName = "Storage",
+	description = "Storage for 192 items",
 	buildable = true,
 	image = GameBuilder:addImage("storage", "res/gfx/storage.png"),
 	drawable = true,

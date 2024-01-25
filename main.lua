@@ -55,6 +55,8 @@ function love.update(dt)
 
 	Camera:lookAt(CameraX, CameraY)
 
+	Panel:update()
+
 	if MapReady then
 		for x, _ in pairs(Cells) do
 			for _, cell in pairs(Cells[x]) do

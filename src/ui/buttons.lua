@@ -16,6 +16,7 @@ function InitButtons()
 				ImageFromCell({ type = v }),
 				function()
 					BuildSelection = v
+					BuildSelectionNum = k
 				end
 			)
 		)

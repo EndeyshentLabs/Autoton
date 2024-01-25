@@ -62,6 +62,7 @@ function DrawGame()
 end
 
 function DrawOverlay()
+	Panel:draw()
 	DrawButtons()
 
 	progressButton:draw()

@@ -98,6 +98,7 @@ end
 
 ---@class CellOpts
 ---@field displayName string Cell's display name
+---@field description string? Cell's description
 ---@field image? love.Image Cell's texture as image
 ---@field update? function<Cell, number> update method
 ---@field buildable boolean Is cell buildable
