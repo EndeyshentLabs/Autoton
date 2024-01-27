@@ -9,6 +9,9 @@ BuildSelection = CellType.NONE
 ---@type integer
 BuildSelectionNum = 0
 
+---@type boolean
+AltView = false
+
 ---@enum OreContentSpawnRates
 OreContentSpawnRates = {
 	[GameBuilder.contentTypes.oreIron] = 0.8,

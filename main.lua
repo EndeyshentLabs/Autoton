@@ -148,6 +148,7 @@ function love.mousepressed(mouseX, mouseY, button)
 	Cells[a][b].storage = {}
 end
 
+---@param key love.KeyConstant
 ---@diagnostic disable-next-line: duplicate-set-field
 function love.keypressed(key)
 	if key == "space" then
@@ -173,6 +174,8 @@ function love.keypressed(key)
 				Rotation = Rotation + 1
 			end
 		end
+	elseif key == "lalt" then
+		AltView = not AltView
 	elseif string.byte(key, 1, 1) >= string.byte("1", 1, 1) and string.byte(key, 1, 1) <= string.byte("9", 1, 1) then
 		local num = string.byte(key, 1, 1) - 48
 		if num <= #BuildableCellTypes then

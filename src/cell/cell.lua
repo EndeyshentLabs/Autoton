@@ -237,7 +237,7 @@ function DrawCell(cell)
 			CellSize / 128
 		)
 
-		if cell.type.isStorage then
+		if cell.type.isStorage and AltView then
 			-- TODO: Make storage an array of `Content`s
 			for k, _ in pairs(cell.storage) do
 				if k and k.image then
