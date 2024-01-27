@@ -1,5 +1,6 @@
 function love.conf(t)
 	t.title = "Autoton. EndeyshentLabs (C), 2023"
+	t.identity = "Autoton"
 	t.console = true
 	t.version = "11.3"
 
