@@ -157,7 +157,7 @@ function love.keypressed(key)
 		local b = math.ceil(y / CellSize)
 
 		for k, v in pairs(Cells[a][b].storage) do
-			print(k, v)
+			print(k.displayName .. "(" .. k._BASED_NAME .. ")", v)
 		end
 	elseif key == "r" then
 		if love.keyboard.isDown("lshift") then
