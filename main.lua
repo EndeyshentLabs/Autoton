@@ -4,8 +4,6 @@ Images = {}
 
 require("lib.30log")
 
-local camera = require("lib.hump.camera")
-
 Camera = nil
 CameraX = 0
 CameraY = 0
@@ -15,56 +13,19 @@ require("utils")
 
 ---@diagnostic disable-next-line: duplicate-set-field
 function love.load()
-	require("src")
+	require("src.stages")
 
-	RequireAll()
-	ParseArgs()
-
-	Camera = camera()
-	Font = love.graphics.newFont("res/fonts/fira.ttf", 15)
-
-	Images.ohno = love.graphics.newImage("res/gfx/ohno.png")
-	Images.load = love.graphics.newImage("res/gfx/load.png")
-	Images.save = love.graphics.newImage("res/gfx/save.png")
-	Images.show_progress = love.graphics.newImage("res/gfx/show-progress.png")
-
-	InitButtons()
-
-	progressButton = ImageButton:new(Width - 48 * 1, 0, 48, 48, Images.show_progress, function()
-		ShowProgress = not ShowProgress
-	end)
-	loadButton = ImageButton:new(Width - 48 * 2, 0, 48, 48, Images.load, loadGame)
-	saveButton = ImageButton:new(Width - 48 * 3, 0, 48, 48, Images.save, saveGame)
-
-	GenerateMap()
+	for _, stage in ipairs(LoadStages) do
+		stage()
+	end
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
 function love.update(dt)
 	PlayTime = PlayTime + dt
-	if love.keyboard.isDown("w") then
-		CameraY = CameraY - 300 * dt
-	elseif love.keyboard.isDown("s") then
-		CameraY = CameraY + 300 * dt
-	end
-	if love.keyboard.isDown("a") then
-		CameraX = CameraX - 300 * dt
-	elseif love.keyboard.isDown("d") then
-		CameraX = CameraX + 300 * dt
-	end
 
-	Camera:lookAt(CameraX, CameraY)
-
-	Panel:update()
-
-	if MapReady then
-		for x, _ in pairs(Cells) do
-			for _, cell in pairs(Cells[x]) do
-				if cell.type ~= CellType.ORE and cell.type ~= CellType.NONE then
-					cell:update(dt)
-				end
-			end
-		end
+	for _, stage in ipairs(UpdateStages) do
+		stage(dt)
 	end
 end
 
@@ -72,11 +33,9 @@ end
 function love.draw()
 	love.graphics.setFont(Font)
 
-	Camera:attach()
-	DrawGame()
-	Camera:detach()
-
-	DrawOverlay()
+	for _, stage in ipairs(DrawStages) do
+		stage()
+	end
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
