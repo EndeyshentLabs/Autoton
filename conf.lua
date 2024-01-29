@@ -4,6 +4,7 @@ function love.conf(t)
 	t.console = true
 	t.version = "11.3"
 
+	t.window.icon = "res/gfx/logo1.png"
 	t.window.width = 800
 	t.window.height = 600
 	t.window.resizable = true
