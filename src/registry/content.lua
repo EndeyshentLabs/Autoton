@@ -3,7 +3,7 @@ ContentType = {
 	["OH_NO"] = {
 		displayName = "OH_NO",
 		image = Images.ohno,
-		_BASED_NAME = "OH_NO"
+		_BASED_NAME = "OH_NO",
 	},
 }
 

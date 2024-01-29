@@ -9,14 +9,14 @@ CellType = {
 		buildable = false,
 		isStorage = false,
 		drawable = false,
-		_BASED_NAME = "NONE"
+		_BASED_NAME = "NONE",
 	},
 	ORE = {
 		displayName = "ORE",
 		buildable = false,
 		isStorage = false,
 		drawable = false,
-		_BASED_NAME = "ORE"
+		_BASED_NAME = "ORE",
 	},
 }
 
@@ -241,7 +241,14 @@ function DrawCell(cell)
 			-- TODO: Make storage an array of `Content`s
 			for k, _ in pairs(cell.storage) do
 				if k and k.image then
-					love.graphics.draw(k.image, (cell.x - 1) * CellSize + CellSize / 2, (cell.y - 1) * CellSize, 0, CellSize / 256, CellSize / 256)
+					love.graphics.draw(
+						k.image,
+						(cell.x - 1) * CellSize + CellSize / 2,
+						(cell.y - 1) * CellSize,
+						0,
+						CellSize / 256,
+						CellSize / 256
+					)
 					break -- yes, we're just doing 1 iteration
 				end
 			end

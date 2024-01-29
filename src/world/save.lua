@@ -20,13 +20,7 @@ function UnwrapCell(cell)
 
 	if cell.under then
 		local _x, _y, __type, _direction, _content = UnwrapCell(cell.under)
-		under = Cell:new(
-			_x or 0,
-			_y or 0,
-			__type,
-			_direction or 0,
-			_content
-		)
+		under = Cell:new(_x or 0, _y or 0, __type, _direction or 0, _content)
 	end
 
 	return x, y, _type, direction, content, under
