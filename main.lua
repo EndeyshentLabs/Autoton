@@ -56,7 +56,6 @@ function love.mousepressed(mouseX, mouseY, button)
 		return
 	end
 
-
 	if button > 2 then
 		return
 	end
@@ -75,6 +74,10 @@ function love.mousepressed(mouseX, mouseY, button)
 	local under =
 		Cell:new(a, b, Cells[a][b].type, nil, Content:new(Cells[a][b].content.opts, Cells[a][b].content.amount))
 	local iserase = button == 2
+
+	if not iserase and (BuildSelectionNum == 0 or BuildSelection == CellType.NONE) then
+		return
+	end
 
 	if not iserase then
 		if
