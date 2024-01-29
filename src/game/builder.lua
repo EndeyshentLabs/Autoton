@@ -172,3 +172,89 @@ GameBuilder:addCell("storage", {
 -- 	drawable = true,
 -- 	isStorage = true,
 -- })
+
+GameBuilder:addKeyboardBind("space", {
+	displayName = "Print storage contents",
+	key = "space",
+	callback = function()
+		local x = love.mouse.getX() - Width / 2 + CameraX
+		local y = love.mouse.getY() - Height / 2 + CameraY
+		local a = math.ceil(x / CellSize)
+		local b = math.ceil(y / CellSize)
+
+		for k, v in pairs(Cells[a][b].storage) do
+			print(k.displayName .. "(" .. k._BASED_NAME .. ")", v)
+		end
+	end,
+})
+
+GameBuilder:addKeyboardBind("r", {
+	displayName = "Rotate cell to build (hold <lshift> to do counter-clockwise)",
+	key = "r",
+	callback = function()
+		if love.keyboard.isDown("lshift") then
+			if Rotation == Direction.RIGHT then
+				Rotation = Direction.UP
+			else
+				Rotation = Rotation - 1
+			end
+		else
+			if Rotation == Direction.UP then
+				Rotation = Direction.RIGHT
+			else
+				Rotation = Rotation + 1
+			end
+		end
+	end,
+})
+
+GameBuilder:addKeyboardBind("lalt", {
+	displayName = "Toggle ALT view mode",
+	key = "lalt",
+	callback = function()
+		AltView = not AltView
+	end,
+})
+
+GameBuilder:addKeyboardBind("q", {
+	displayName = "Clear build selection",
+	key = "q",
+	callback = function()
+		BuildSelection = CellType.NONE
+		BuildSelectionNum = 0
+	end,
+})
+
+GameBuilder:addKeyboardBind("p", {
+	displayName = "Save game",
+	key = "p",
+	callback = function()
+		saveGame()
+	end,
+})
+
+GameBuilder:addKeyboardBind("l", {
+	displayName = "Load saved game",
+	key = "l",
+	callback = function()
+		loadGame()
+	end,
+})
+
+GameBuilder:addKeyboardBind("f5", {
+	displayName = "Re-generate map on the same seed",
+	key = "f5",
+	callback = function()
+		MapReady = false
+		GenerateMap()
+		MapReady = true
+	end,
+})
+
+GameBuilder:addKeyboardBind("f9", {
+	displayName = "Open debug lua console (lua debug.debug())",
+	key = "f9",
+	callback = function()
+		debug.debug()
+	end,
+})

@@ -113,50 +113,21 @@ end
 ---@param key love.KeyConstant
 ---@diagnostic disable-next-line: duplicate-set-field
 function love.keypressed(key)
-	if key == "space" then
-		local x = love.mouse.getX() - Width / 2 + CameraX
-		local y = love.mouse.getY() - Height / 2 + CameraY
-		local a = math.ceil(x / CellSize)
-		local b = math.ceil(y / CellSize)
-
-		for k, v in pairs(Cells[a][b].storage) do
-			print(k.displayName .. "(" .. k._BASED_NAME .. ")", v)
-		end
-	elseif key == "r" then
-		if love.keyboard.isDown("lshift") then
-			if Rotation == Direction.RIGHT then
-				Rotation = Direction.UP
-			else
-				Rotation = Rotation - 1
-			end
-		else
-			if Rotation == Direction.UP then
-				Rotation = Direction.RIGHT
-			else
-				Rotation = Rotation + 1
-			end
-		end
-	elseif key == "lalt" then
-		AltView = not AltView
-	elseif string.byte(key, 1, 1) >= string.byte("1", 1, 1) and string.byte(key, 1, 1) <= string.byte("9", 1, 1) then
+	-- TODO: Migrate this to keybind system
+	if string.byte(key, 1, 1) >= string.byte("1", 1, 1) and string.byte(key, 1, 1) <= string.byte("9", 1, 1) then
 		local num = string.byte(key, 1, 1) - 48
 		if num <= #BuildableCellTypes then
 			BuildSelection = BuildableCellTypes[num]
 			BuildSelectionNum = num
 		end
-	elseif key == "q" then
-		BuildSelection = CellType.NONE
-		BuildSelectionNum = 0
-	elseif key == "p" then
-		saveGame()
-	elseif key == "l" then
-		loadGame()
-	elseif key == "f5" then
-		MapReady = false
-		GenerateMap()
-		MapReady = true
-	elseif key == "f9" and IsDebug then
-		debug.debug()
+
+		return
+	end
+
+	local bind = KeyboardBinds[key]
+
+	if bind then
+		bind.callback()
 	end
 end
 

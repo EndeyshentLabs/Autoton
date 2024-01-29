@@ -6,12 +6,14 @@ RESERVED_GAME_BASE = "AUTOTON"
 ---@field images table<love.Image> Images added/created by builder
 ---@field contentTypes table<ContentOpts> ContentTypes added/created by builder
 ---@field cellTypes table<Cell> Cells added/created by builder
+---@field binds table<love.KeyConstant, KeyboardBindOpts> Keyboard keybinds
 ---@field new function
 ContentBuilder = class("ContentBuilder", {
 	base = "",
 	images = {},
 	contentTypes = {},
 	cellTypes = {},
+	binds = {},
 })
 
 function ContentBuilder:init(base)
@@ -65,6 +67,15 @@ function ContentBuilder:addCell(name, opts)
 	end
 end
 
+---Add new KeyboardBind
+---@param key love.KeyConstant
+---@param opts KeyboardBindOpts
+function ContentBuilder:addKeyboardBind(key, opts)
+	KeyboardBinds[key] = opts
+	KeyboardBinds[key]._BASED_NAME = self:basedName(key)
+	self.binds[key] = KeyboardBinds[key]
+end
+
 ContentRegistry = {
 	---@type table<string, ContentBuilder>
 	entries = {},
@@ -106,3 +117,11 @@ end
 ---@field isStorage boolean Is cell buildable
 ---@field maxCap? integer Storage's max capacity
 ---@field time? number Is cell buildable
+
+---@class KeyboardBindOpts
+---@field displayName string
+---@field key love.KeyConstant
+---@field mod1 love.KeyConstant?
+---@field mod2 love.KeyConstant?
+---@field mod3 love.KeyConstant?
+---@field callback function
