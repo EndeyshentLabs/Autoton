@@ -105,30 +105,32 @@ GameBuilder:addCell("junction", {
 	---@param self Cell
 	---@param dt number
 	update = function(self, dt)
-		-- TODO: Rewrite
-
 		local inputX = nil
 		local inputY = nil
 		local inputOffsetX = 0
 		local inputOffsetY = 0
 
-		if self:lookup(-1).type == CellType.CONVEYOR and self:lookup(-1).direction == Direction.RIGHT then
+		local conveyorType = GameBuilder.cellTypes.conveyor
+
+		if self:lookup(-1).type == conveyorType and self:lookup(-1).direction == Direction.RIGHT then
 			inputX = self:lookup(-1)
 			inputOffsetX = -1
-		elseif self:lookup(1).type == CellType.CONVEYOR and self:lookup(1).direction == Direction.LEFT then
+		elseif self:lookup(1).type == conveyorType and self:lookup(1).direction == Direction.LEFT then
 			inputX = self:lookup(1)
 			inputOffsetX = 1
 		end
 
-		if self:lookup(0, -1).type == CellType.CONVEYOR and self:lookup(0, -1).direction == Direction.DOWN then
+		if self:lookup(0, -1).type == conveyorType and self:lookup(0, -1).direction == Direction.DOWN then
 			inputY = self:lookup(0, -1)
 			inputOffsetY = -1
-		elseif self:lookup(0, 1).type == CellType.CONVEYOR and self:lookup(0, 1).direction == Direction.UP then
+		elseif self:lookup(0, 1).type == conveyorType and self:lookup(0, 1).direction == Direction.UP then
 			inputY = self:lookup(0, 1)
 			inputOffsetY = 1
 		end
 
+		---@type Cell|nil
 		local dstX = nil
+		---@type Cell|nil
 		local dstY = nil
 		if inputOffsetX ~= 0 then
 			dstX = self:lookup(inputOffsetX * -1)
@@ -137,10 +139,10 @@ GameBuilder:addCell("junction", {
 			dstY = self:lookup(0, inputOffsetY * -1)
 		end
 
-		if inputX and dstX and dstX.isStorage and not dstX:isStorageFull() then
+		if inputX and dstX and dstX.type.isStorage and not dstX:isStorageFull() then
 			inputX:transferStorage(dstX)
 		end
-		if inputY and dstY and dstY.isStorage and not dstY:isStorageFull() then
+		if inputY and dstY and dstY.type.isStorage and not dstY:isStorageFull() then
 			inputY:transferStorage(dstY)
 		end
 	end,
@@ -157,7 +159,7 @@ GameBuilder:addCell("storage", {
 })
 
 GameBuilder:addCell("core", {
-	displayName= "Core",
+	displayName = "Core",
 	buildable = true,
 	image = GameBuilder:addImage("core", "res/gfx/core.png"),
 	drawable = true,
@@ -165,14 +167,14 @@ GameBuilder:addCell("core", {
 	maxCap = 99999, -- """INFINITE""" maxCap
 	---@param self Cell
 	---@param dt number
-	update = function (self, dt)
+	update = function(self, dt)
 		if self:storageCapacity() > 0 then
 			local storage = self:removeFromStorage()
 			for content, amount in pairs(storage) do
 				Core:add(Content:new(ContentType[content._BASED_NAME], amount))
 			end
 		end
-	end
+	end,
 })
 
 GameBuilder:addKeyboardBind("space", {
