@@ -1,5 +1,3 @@
-require("lib.32log")
-
 ---@class ImageButton
 ---@field x integer
 ---@field y integer
@@ -8,13 +6,12 @@ require("lib.32log")
 ---@field image love.Image
 ---@field callback function
 ---@field new function<integer, integer, integer, integer, love.Image, function>
-ImageButton = {}
-class("ImageButton")({
+ImageButton = class("ImageButton", {
 	x = 0,
 	y = 0,
 	w = 0,
 	h = 0,
-	image = love.graphics.newImage("res/gfx/ohno.png"),
+	image = Images.ohno,
 	callback = function()
 		assert(false, "Callback is not implemented! Please implement it when creating new instance of ImageButton.")
 	end,
@@ -24,14 +21,14 @@ class("ImageButton")({
 ---@param y integer
 ---@param w integer Width
 ---@param h integer Height
----@param image love.Image
+---@param image love.Image?
 ---@param callback function
-function ImageButton:__init(x, y, w, h, image, callback)
+function ImageButton:init(x, y, w, h, image, callback)
 	self.x = x
 	self.y = y
 	self.w = w
 	self.h = h
-	self.image = image or love.graphics.newImage("res/gfx/ohno.png")
+	self.image = image or Images.ohno
 	self.callback = callback
 		or function()
 			assert(false, "Callback is not implemented! Please implement it when creating new instance of ImageButton.")

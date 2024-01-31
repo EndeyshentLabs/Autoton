@@ -1,25 +1,4 @@
--- CLASS UTILS
-
----OOP. Extneds a class.
----Usage:
----```lua
----Animal = {}
----
----function Animal:new(name)
----    -- fields methods and so on
----end
----
----Cat = extended(Animal) -- Will inherit all fields and methods
----```
----@param parent table
----@return table
-function extended(parent)
-	local child = {}
-	setmetatable(child, { __index = parent })
-	return child
-end
-
--- MISC UTILS
+-- Draw utils
 
 ---Print the `text` with drop-shadow.
 ---@param text string String to print
@@ -31,25 +10,25 @@ end
 ---@param sR? number Red component of the shadow color
 ---@param sG? number Green component of the shadow color
 ---@param sB? number Blue component of the shadow color
-function printShadow(text, x, y, r, g, b, sR, sG, sB)
+function PrintShadow(text, x, y, r, g, b, sR, sG, sB)
 	if sR and sG and sB then
 		love.graphics.setColor(sR, sG, sB)
 	else
 		love.graphics.setColor(0.25, 0.25, 0.25)
 	end
-	love.graphics.print(text, Font, x + 2, y + 2)
+	love.graphics.print(text, x + 2, y + 2)
 	if r and g and b then
 		love.graphics.setColor(r, g, b)
 	else
 		love.graphics.setColor(1, 1, 1)
 	end
-	love.graphics.print(text, Font, x, y)
+	love.graphics.print(text, x, y)
 end
 
 ---love.graphics.setColor but uses hex string.
 ---Yoinked from https://love2d.org/wiki/love.math.colorFromBytes#Example
 ---@param rgba string Hex string (e.g. "#RRGGBBAA")
-function setColorHEX(rgba)
+function SetColorHEX(rgba)
 	assert(rgba:sub(1, 1) == "#", "Hex string starts with `#`!")
 	assert(#rgba >= 7, "Too short hex color!")
 	assert(#rgba <= 9, "Too long hex color!")
@@ -60,18 +39,9 @@ function setColorHEX(rgba)
 	love.graphics.setColor(love.math.colorFromBytes(rb, gb, bb, ab))
 end
 
----Checks, if game is running in debug mode(`--debug` flag)
----@return boolean
-function isDebug()
-	-- Debug flag need to be last flag!
-	if arg[#arg] == "-debug" or arg[#arg] == "--debug" then
-		return true
-	else
-		return false
-	end
-end
+-- Enum utils
 
-function protectEnum(e)
+function ProtectEnum(e)
 	setmetatable(e, {
 		__newindex = function()
 			error("Changing values of enums in not allowed!")
