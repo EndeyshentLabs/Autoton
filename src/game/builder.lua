@@ -83,15 +83,7 @@ GameBuilder:addCell("conveyor", {
 		self.progress = self.progress + dt * (100 / GameBuilder.cellTypes.conveyor.time)
 
 		local updated = false
-		if dstCell.type == CellType.CORE and self.progress >= 100 then
-			for n, a in pairs(self.storage) do
-				Core:add(Content:new(n, a))
-			end
-
-			self.storage = {}
-
-			updated = true
-		elseif not dstCell:isStorageFull() and self.progress >= 100 then
+		if not dstCell:isStorageFull() and self.progress >= 100 then
 			self:transferStorage(dstCell)
 
 			updated = true
@@ -164,14 +156,24 @@ GameBuilder:addCell("storage", {
 	maxCap = 64 * 3,
 })
 
--- TODO: Fix CORE cell
--- GameBuilder:addCell("core", {
--- 	displayName= "Core",
--- 	buildable = true,
--- 	image = GameBuilder:addImage("core", "res/gfx/core.png"),
--- 	drawable = true,
--- 	isStorage = true,
--- })
+GameBuilder:addCell("core", {
+	displayName= "Core",
+	buildable = true,
+	image = GameBuilder:addImage("core", "res/gfx/core.png"),
+	drawable = true,
+	isStorage = true,
+	maxCap = 99999, -- """INFINITE""" maxCap
+	---@param self Cell
+	---@param dt number
+	update = function (self, dt)
+		if self:storageCapacity() > 0 then
+			local storage = self:removeFromStorage()
+			for content, amount in pairs(storage) do
+				Core:add(Content:new(ContentType[content._BASED_NAME], amount))
+			end
+		end
+	end
+})
 
 GameBuilder:addKeyboardBind("space", {
 	displayName = "Print storage contents",
@@ -182,8 +184,13 @@ GameBuilder:addKeyboardBind("space", {
 		local a = math.ceil(x / CellSize)
 		local b = math.ceil(y / CellSize)
 
+		local s = ""
 		for k, v in pairs(Cells[a][b].storage) do
-			print(k.displayName .. "(" .. k._BASED_NAME .. ")", v)
+			s = s .. k.displayName .. "(" .. k._BASED_NAME .. ")" .. " - " .. v .. "\n"
+		end
+
+		if s ~= nil and s ~= "" then
+			love.window.showMessageBox("Cell's storage", s, "info")
 		end
 	end,
 })

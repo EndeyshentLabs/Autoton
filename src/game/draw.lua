@@ -99,11 +99,11 @@ function DrawOverlay()
 	)
 
 	local index = 0
-	for name, amount in pairs(Core) do
+	for content, amount in pairs(Core) do
 		if type(amount) == "function" then
 			goto continue3
 		end
-		love.graphics.print(("%s: %d"):format(name, amount), 48 * 5 + 2, Font:getHeight() * index)
+		love.graphics.print(("%s: %d"):format(content.displayName, amount), 48 * 5 + 2, Font:getHeight() * index)
 		index = index + 1
 		::continue3::
 	end

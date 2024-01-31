@@ -86,12 +86,22 @@ function love.mousepressed(mouseX, mouseY, button)
 		Cells[a][b].direction = Rotation
 		Cells[a][b].type = BuildSelection
 
+		if BuildSelection == GameBuilder.cellTypes.core then
+			IsCorePlased = true
+		end
+
 		::exit::
 	end
 
 	if iserase and Cells[a][b].type ~= CellType.ORE then
 		if Cells[a][b].type == GameBuilder.cellTypes.core then
 			IsCorePlased = false
+
+			for k, v in pairs(Core) do
+				if type(v) == "number" then
+					Core[k] = nil
+				end
+			end
 		end
 		Cells[a][b].type = CellType.NONE
 	end
