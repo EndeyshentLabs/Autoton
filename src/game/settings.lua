@@ -10,7 +10,7 @@ BuildSelection = CellType.NONE
 BuildSelectionNum = 0
 
 ---@type boolean
-AltView = false
+AltView = true
 
 ---@enum OreContentSpawnRates
 OreContentSpawnRates = {
