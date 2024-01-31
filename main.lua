@@ -134,6 +134,7 @@ function love.resize()
 	end
 end
 
+-- TODO: Save storage and progress
 function saveGame()
 	local s = ("return ({{ playTime = %f, seed = %d, generation = %d }, {\n"):format(
 		PlayTime,
