@@ -2,7 +2,7 @@
 
 # Autoton
 
-Factory building automation game. Inspired by [Combine & Conquer](https://buckmartin.de), [Mindustry](https://github.com/Anuken/Mindustry)
+Factory building automation game. Inspired by [Combine & Conquer](https://buckmartin.de), [Mindustry](https://github.com/Anuken/Mindustry),
 [GregTech](https://gregtech.overminddl1.com).
 
 > [!WARNING]
