@@ -46,13 +46,7 @@ function love.mousepressed(mouseX, mouseY, button)
 	if mouseX < ButtonColumnCount * ButtonSize then
 		return
 	end
-	if saveButton:update() then
-		return
-	end
-	if loadButton:update() then
-		return
-	end
-	if progressButton:update() then
+	if UpdateUtilButtons() then
 		return
 	end
 
@@ -135,9 +129,9 @@ end
 function love.resize()
 	Width = love.graphics.getWidth()
 	Height = love.graphics.getHeight()
-	progressButton.x = Width - 48
-	loadButton.x = Width - 48 * 2
-	saveButton.x = Width - 48 * 3
+	for k, utilButton in ipairs(UtilButtons) do
+		utilButton.x = Width - ButtonSize * k
+	end
 end
 
 function saveGame()

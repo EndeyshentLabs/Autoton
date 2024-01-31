@@ -64,16 +64,16 @@ end
 function DrawOverlay()
 	Panel:draw()
 	DrawButtons()
+	DrawUtilButtons()
 
-	progressButton:draw()
+	-- TODO: Add ToggleImageButton class
 	if ShowProgress then
 		love.graphics.setColor(0, 1, 0)
 	else
 		love.graphics.setColor(1, 0, 0)
 	end
-	love.graphics.rectangle("line", progressButton.x, progressButton.y, progressButton.w, progressButton.h)
-	loadButton:draw()
-	saveButton:draw()
+	-- UtilButtons[1] should be ShowProgress toggle button
+	love.graphics.rectangle("line", UtilButtons[1].x, UtilButtons[1].y, UtilButtons[1].w, UtilButtons[1].h)
 
 	if BuildSelection ~= CellType.NONE then
 		love.graphics.setColor(0, 1, 0)

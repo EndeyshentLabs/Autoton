@@ -15,16 +15,33 @@ function Load_resources()
 	Images.load = love.graphics.newImage("res/gfx/load.png")
 	Images.save = love.graphics.newImage("res/gfx/save.png")
 	Images.show_progress = love.graphics.newImage("res/gfx/show-progress.png")
+
+	---@type table<table<love.Image, function>>
+	UtilButtonsProto = {
+		{
+			Images.show_progress,
+			function()
+				ShowProgress = not ShowProgress
+			end,
+		},
+		{
+			Images.load,
+			function()
+				loadGame()
+			end,
+		},
+		{
+			Images.save,
+			function()
+				saveGame()
+			end,
+		},
+	}
 end
 
 function Load_ui()
 	InitButtons()
-
-	progressButton = ImageButton:new(Width - 48 * 1, 0, 48, 48, Images.show_progress, function()
-		ShowProgress = not ShowProgress
-	end)
-	loadButton = ImageButton:new(Width - 48 * 2, 0, 48, 48, Images.load, loadGame)
-	saveButton = ImageButton:new(Width - 48 * 3, 0, 48, 48, Images.save, saveGame)
+	InitUtilButtons()
 end
 
 function Load_after()
