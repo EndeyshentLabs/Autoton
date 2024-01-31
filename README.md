@@ -10,7 +10,7 @@ Factory building automation game. Inspired by [Combine & Conquer](https://buckma
 
 ## Build-it
 
-This game using [Fluid](https://github.com/EndeyshentLabs/fluid) build system
+This game using [Fluid](https://github.com/EndeyshentLabs/fluid) build system.
 
 ```console
 $ ./fluid
