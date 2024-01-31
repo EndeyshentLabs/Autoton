@@ -9,6 +9,7 @@ end
 
 function Load_resources()
 	Camera = camera()
+	Camera.smoother = Camera.smooth.damped(5)
 	Font = love.graphics.newFont("res/fonts/fira.ttf", 15)
 
 	Images.ohno = love.graphics.newImage("res/gfx/ohno.png")
