@@ -113,7 +113,7 @@ end
 ---@param key love.KeyConstant
 ---@diagnostic disable-next-line: duplicate-set-field
 function love.keypressed(key)
-	-- TODO: Migrate this to keybind system
+	-- TODO: Migrate this to keybind system(probably arrow keys)
 	if string.byte(key, 1, 1) >= string.byte("1", 1, 1) and string.byte(key, 1, 1) <= string.byte("9", 1, 1) then
 		local num = string.byte(key, 1, 1) - 48
 		if num <= #BuildableCellTypes then
