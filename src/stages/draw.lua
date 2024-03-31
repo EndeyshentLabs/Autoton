@@ -6,6 +6,7 @@ end
 
 function Draw_ui()
 	DrawOverlay()
+	Some:draw()
 end
 
 DrawStages = {

@@ -8,11 +8,15 @@ Camera = nil
 CameraX = 0
 CameraY = 0
 
+Some = require("lib.some.some")
+
 require("args")
 require("utils")
 
 ---@diagnostic disable-next-line: duplicate-set-field
 function love.load()
+	love.keyboard.setKeyRepeat(true)
+
 	require("src.stages")
 
 	for _, stage in ipairs(LoadStages) do
@@ -40,6 +44,11 @@ end
 
 ---@diagnostic disable-next-line: duplicate-set-field
 function love.mousepressed(mouseX, mouseY, button)
+	if Some.isInputGrabbed() then
+		Some:mousepressed(mouseX, mouseY, button)
+		return
+	end
+
 	if UpdateButtons() then
 		return
 	end
@@ -116,7 +125,12 @@ end
 
 ---@param key love.KeyConstant
 ---@diagnostic disable-next-line: duplicate-set-field
-function love.keypressed(key)
+function love.keypressed(key, sc, rep)
+	if Some.isInputGrabbed() then
+		Some:keypressed(key, sc, rep)
+		return
+	end
+
 	-- TODO: Migrate this to keybind system(probably arrow keys)
 	if string.byte(key, 1, 1) >= string.byte("1", 1, 1) and string.byte(key, 1, 1) <= string.byte("9", 1, 1) then
 		local num = string.byte(key, 1, 1) - 48
@@ -141,6 +155,17 @@ function love.resize()
 	Height = love.graphics.getHeight()
 	for k, utilButton in ipairs(UtilButtons) do
 		utilButton.x = Width - ButtonSize * k
+	end
+end
+
+function love.mousemoved(x, y, dx, dy)
+	Some:mousemoved(x, y, dx, dy)
+end
+
+function love.textinput(t)
+	if Some.isInputGrabbed() then
+		Some:textinput(t)
+		return
 	end
 end
 
