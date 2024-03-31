@@ -4,3 +4,6 @@
 [submodule "lib/vudu"]
 	path = lib/vudu
 	url = https://github.com/deltadaedalus/vudu.git
+[submodule "lib/some"]
+	path = lib/some
+	url = https://github.com/EndeyshentLabs/Some.git
