@@ -51,17 +51,17 @@ NOTE "Done!"
 
 # Windows
 printf "[NOTE] Building for Windows...\n"
-if [[ ! -d ./love-11.4-win64 ]]; then
+if [[ ! -d ./love-11.5-win64 ]]; then
 	printf "\t"
-	NOTE "Downloading and unpacking love2d-11.4-win64"
-	wget https://github.com/love2d/love/releases/download/11.4/love-11.4-win64.zip
-	unzip ./love-11.4-win64.zip
-	rm love-11.4-win64.zip*
+	NOTE "Downloading and unpacking love2d-11.5-win64"
+	wget https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip
+	unzip ./love-11.5-win64.zip
+	rm love-11.5-win64.zip*
 	printf "\t"
 	NOTE "Done!"
 fi
-cat ./love-11.4-win64/love.exe ./$BUILD_DIR/$NAME.love > ./$NAME.exe
-cp  ./love-11.4-win64/*.dll ./$BUILD_DIR/
+cat ./love-11.5-win64/love.exe ./$BUILD_DIR/$NAME.love > ./$NAME.exe
+cp  ./love-11.5-win64/*.dll ./$BUILD_DIR/
 chmod +x ./$NAME.exe # idk why
 mv ./$NAME.exe ./$BUILD_DIR
 NOTE "Done!"
