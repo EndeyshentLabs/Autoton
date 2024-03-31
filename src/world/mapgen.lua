@@ -14,7 +14,7 @@ function GenerateMap()
 		oreGrid[x] = {}
 
 		for y = 1, CellAmount do
-			oreGrid[x][y] = love.math.noise(baseX + 0.1 * x, baseY + 0.1 * y)
+			oreGrid[x][y] = love.math.noise(baseX + BasisX * x, baseY + BasisY * y)
 		end
 	end
 

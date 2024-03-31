@@ -17,3 +17,8 @@ OreContentSpawnRates = {
 	[GameBuilder.contentTypes.oreIron] = 0.8,
 	[GameBuilder.contentTypes.oreGold] = 0.1,
 }
+
+-- Mapgen "stretching" factor
+
+BasisX = 0.05
+BasisY = 0.1
