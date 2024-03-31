@@ -4,6 +4,7 @@ build/
 *.gz
 *.tgz
 *.xz
+*.bz2
 *.tar
 *.rar
 *.love
