@@ -80,6 +80,9 @@ function Load_windows()
 	local fullscreenButton = Some.WcheckButton(SettingsWdow, 0, margin(20), love.window.getFullscreen())
 	Some.Wtext(SettingsWdow, "Fullscreen", 20, margin(0) + 20 / 2 - Font:getHeight() / 2)
 
+	Some.Wtext(SettingsWdow, "Language: " .. CurrentLocaleName, 0, margin(20))
+	Some.Wtext(SettingsWdow, "Changing the language is currently unavailable", 10, margin(20))
+
 	Some.WtextButton(SettingsWdow, "Save", 0, SettingsWdow.h - Font:getHeight() * 2, function ()
 		love.window.setVSync(vsyncButton.enabled)
 		love.window.setFullscreen(fullscreenButton.enabled)
