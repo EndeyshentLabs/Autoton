@@ -71,7 +71,6 @@ function Load_windows()
 	Some.Wtext(SettingsWdow, "Fullscreen", 20, margin(0) + 20 / 2 - Font:getHeight() / 2)
 
 	Some.WtextButton(SettingsWdow, "Save", 0, SettingsWdow.h - Font:getHeight() * 2, function ()
-		-- FIXME: (lib.Some) Make Widget funcitons to return reference to the created widget to prevent this magic numbers
 		love.window.setVSync(SettingsWdow.widgets[1].enabled)
 		love.window.setFullscreen(SettingsWdow.widgets[3].enabled)
 	end)
