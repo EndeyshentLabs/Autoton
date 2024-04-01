@@ -64,15 +64,15 @@ function Load_windows()
 	SettingsWdow = Some.addWindow("Settings", 0, 0, 300, 600, false, true)
 	SettingsWdow.active = false
 
-	Some.WcheckButton(SettingsWdow, 0, margin(0), love.window.getVSync() == 1)
+	local vsyncButton = Some.WcheckButton(SettingsWdow, 0, margin(0), love.window.getVSync() == 1)
 	Some.Wtext(SettingsWdow, "VSync", 20, margin(0) + 20 / 2 - Font:getHeight() / 2)
 
-	Some.WcheckButton(SettingsWdow, 0, margin(20), love.window.getFullscreen())
+	local fullscreenButton = Some.WcheckButton(SettingsWdow, 0, margin(20), love.window.getFullscreen())
 	Some.Wtext(SettingsWdow, "Fullscreen", 20, margin(0) + 20 / 2 - Font:getHeight() / 2)
 
 	Some.WtextButton(SettingsWdow, "Save", 0, SettingsWdow.h - Font:getHeight() * 2, function ()
-		love.window.setVSync(SettingsWdow.widgets[1].enabled)
-		love.window.setFullscreen(SettingsWdow.widgets[3].enabled)
+		love.window.setVSync(vsyncButton.enabled)
+		love.window.setFullscreen(fullscreenButton.enabled)
 	end)
 	Some.WtextButton(SettingsWdow, "Close", Font:getWidth("Save") + 2, SettingsWdow.h - Font:getHeight() * 2, function ()
 		SettingsWdow.active = false
