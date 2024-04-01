@@ -2,18 +2,18 @@
 GameBuilder = ContentBuilder:new(RESERVED_GAME_BASE)
 
 GameBuilder:addContent("oreIron", {
-	displayName = "Iron Ore",
+	displayName = CurrentLocale.oreIron,
 	image = GameBuilder:addImage("oreIron", "res/gfx/ore-iron.png"),
 })
 
 GameBuilder:addContent("oreGold", {
-	displayName = "Gold Ore",
+	displayName = CurrentLocale.oreGold,
 	image = GameBuilder:addImage("oreGold", "res/gfx/ore-gold.png"),
 })
 
 GameBuilder:addCell("miner", {
-	displayName = "Miner",
-	description = "Mines resources",
+	displayName = CurrentLocale.cellMinerName,
+	description = CurrentLocale.cellMinerDesc,
 	buildable = true,
 	time = 2,
 	image = GameBuilder:addImage("miner", "res/gfx/generator.png"),
@@ -48,8 +48,8 @@ GameBuilder:addCell("miner", {
 })
 
 GameBuilder:addCell("conveyor", {
-	displayName = "Conveyor",
-	description = ">Moving> resources",
+	displayName = CurrentLocale.cellConveyorName,
+	description = CurrentLocale.cellConveyorDesc,
 	buildable = true,
 	time = 1,
 	image = GameBuilder:addImage("conveyor", "res/gfx/conveyor.png"),
@@ -96,8 +96,8 @@ GameBuilder:addCell("conveyor", {
 })
 
 GameBuilder:addCell("junction", {
-	displayName = "Junction",
-	description = "Works like -|-",
+	displayName = CurrentLocale.cellJunctionName,
+	description = CurrentLocale.cellJunctionDesc,
 	buildable = true,
 	image = GameBuilder:addImage("junction", "res/gfx/junction.png"),
 	drawable = true,
@@ -149,8 +149,8 @@ GameBuilder:addCell("junction", {
 })
 
 GameBuilder:addCell("storage", {
-	displayName = "Storage",
-	description = "Storage for 192 items",
+	displayName = CurrentLocale.cellStorageName,
+	description = CurrentLocale.cellStorageDesc,
 	buildable = true,
 	image = GameBuilder:addImage("storage", "res/gfx/storage.png"),
 	drawable = true,
@@ -159,7 +159,7 @@ GameBuilder:addCell("storage", {
 })
 
 GameBuilder:addCell("core", {
-	displayName = "Core",
+	displayName = CurrentLocale.cellCoreName,
 	buildable = true,
 	image = GameBuilder:addImage("core", "res/gfx/core.png"),
 	drawable = true,
@@ -176,6 +176,8 @@ GameBuilder:addCell("core", {
 		end
 	end,
 })
+
+-- TODO: Locales for keybinds
 
 GameBuilder:addKeyboardBind("space", {
 	displayName = "Print storage contents",

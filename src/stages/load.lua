@@ -1,6 +1,14 @@
 local camera = require("lib.hump.camera")
 
 function Load_pre()
+	-- TODO: Load saved settings
+
+	-- Safely loading the locale (to prevent nil string)
+	local locale = require("locale." .. CurrentLocaleName)
+	for name, value in pairs(locale) do
+		CurrentLocale[name] = value
+	end
+
 	require("src")
 
 	RequireAll()
@@ -60,6 +68,8 @@ end
 
 function Load_windows()
 	Some.theme.font = Font
+
+	-- TODO: Add locales for settings window
 
 	SettingsWdow = Some.addWindow("Settings", 0, 0, 300, 600, false, true)
 	SettingsWdow.active = false

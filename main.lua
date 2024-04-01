@@ -8,6 +8,23 @@ Camera = nil
 CameraX = 0
 CameraY = 0
 
+CurrentLocaleName = "en_US"
+-- Stub locale
+CurrentLocale = {
+	oreIron = "oreIron",
+	oreGold = "oreGold",
+	cellMinerName = "cellMinerName",
+	cellMinerDesc = "cellMinerDesc",
+	cellConveyorName = "cellConveyorName",
+	cellConveyorDesc = "cellConveyorDesc",
+	cellJunctionName = "cellJunctionName",
+	cellJunctionDesc = "cellJunctionDesc",
+	cellStorageName = "cellStorageName",
+	cellStorageDesc = "cellStorageDesc",
+	cellCoreName = "cellCoreName",
+	cellCoreDesc = "cellCoreDesc",
+}
+
 Some = require("lib.some.some")
 
 require("args")
