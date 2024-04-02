@@ -23,6 +23,14 @@ CurrentLocale = {
 	cellStorageDesc = "cellStorageDesc",
 	cellCoreName = "cellCoreName",
 	cellCoreDesc = "cellCoreDesc",
+
+    settingWindowTitle = "settingWindowTitle",
+	vsync = "vsync",
+	fullscreen = "fullscreen",
+	language = "language",
+	noChangeLang = "noChangeLang",
+	save = "save",
+	close = "close",
 }
 
 Some = require("lib.some.some")

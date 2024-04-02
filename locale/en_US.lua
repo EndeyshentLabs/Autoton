@@ -10,6 +10,14 @@ local locale = {
 	cellStorageName = "Storage",
 	cellStorageDesc = "Storage for 192 items",
 	cellCoreName = "Core",
+
+    settingWindowTitle = "Settings",
+	vsync = "VSync",
+	fullscreen = "Fullscreen",
+	language = "Language",
+	noChangeLang = "Changing the language is currently unavailable",
+	save = "Save",
+	close = "Close",
 }
 
 return locale
