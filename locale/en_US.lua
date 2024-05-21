@@ -11,7 +11,7 @@ local locale = {
 	cellStorageDesc = "Storage for 192 items",
 	cellCoreName = "Core",
 
-    settingWindowTitle = "Settings",
+	settingWindowTitle = "Settings",
 	vsync = "VSync",
 	fullscreen = "Fullscreen",
 	language = "Language",

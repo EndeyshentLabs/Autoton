@@ -11,7 +11,7 @@ local locale = {
 	cellStorageDesc = "Хранилище для 192-х предметов",
 	cellCoreName = "Ядро",
 
-    settingWindowTitle = "Наcтройки",
+	settingWindowTitle = "Наcтройки",
 	vsync = "Вертикальная синхронизация (VSync)",
 	fullscreen = "Полноэкранный режим",
 	language = "Язык",

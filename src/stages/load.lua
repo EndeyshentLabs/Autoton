@@ -81,17 +81,23 @@ function Load_windows()
 	Some.Wtext(SettingsWdow, CurrentLocale.language .. ": (" .. CurrentLocale.requiresRestart .. ")", 0, margin(20))
 	local localeDropdown = Some.Wdropdown(SettingsWdow, 0, margin(20), Locales, CurrentLocaleIndex)
 
-	Some.WtextButton(SettingsWdow, CurrentLocale.save, 0, SettingsWdow.h - Font:getHeight() * 2, function ()
+	Some.WtextButton(SettingsWdow, CurrentLocale.save, 0, SettingsWdow.h - Font:getHeight() * 2, function()
 		love.window.setVSync(vsyncButton.enabled)
 		love.window.setFullscreen(fullscreenButton.enabled)
 		CurrentLocaleIndex = localeDropdown.current
 		SaveLocale()
 	end)
 
-	Some.WtextButton(SettingsWdow, CurrentLocale.close, Font:getWidth(CurrentLocale.save) + 2, SettingsWdow.h - Font:getHeight() * 2, function ()
-		SettingsWdow.active = false
-		Some:mousemoved(love.mouse.getX(), love.mouse.getY())
-	end)
+	Some.WtextButton(
+		SettingsWdow,
+		CurrentLocale.close,
+		Font:getWidth(CurrentLocale.save) + 2,
+		SettingsWdow.h - Font:getHeight() * 2,
+		function()
+			SettingsWdow.active = false
+			Some:mousemoved(love.mouse.getX(), love.mouse.getY())
+		end
+	)
 end
 
 function Load_after()
