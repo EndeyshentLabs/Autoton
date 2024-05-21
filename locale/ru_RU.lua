@@ -15,7 +15,7 @@ local locale = {
 	vsync = "Вертикальная синхронизация (VSync)",
 	fullscreen = "Полноэкранный режим",
 	language = "Язык",
-	noChangeLang = "В данный момент смена языка недоступна",
+	requiresRestart = "Требуется перезагрузка",
 	save = "Сохранить",
 	close = "Закрыть",
 }

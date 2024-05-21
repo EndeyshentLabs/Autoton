@@ -15,7 +15,7 @@ local locale = {
 	vsync = "VSync",
 	fullscreen = "Fullscreen",
 	language = "Language",
-	noChangeLang = "Changing the language is currently unavailable",
+	requiresRestart = "Requires restart",
 	save = "Save",
 	close = "Close",
 }

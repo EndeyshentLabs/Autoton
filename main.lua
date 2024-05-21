@@ -8,7 +8,11 @@ Camera = nil
 CameraX = 0
 CameraY = 0
 
-CurrentLocaleName = "en_US"
+Locales = {
+	"en_US",
+	"ru_RU",
+}
+CurrentLocaleIndex = 1
 -- Stub locale
 CurrentLocale = {
 	oreIron = "oreIron",
@@ -28,7 +32,7 @@ CurrentLocale = {
 	vsync = "vsync",
 	fullscreen = "fullscreen",
 	language = "language",
-	noChangeLang = "noChangeLang",
+	requiresRestart = "requiresRestart",
 	save = "save",
 	close = "close",
 }
@@ -41,6 +45,11 @@ require("utils")
 ---@diagnostic disable-next-line: duplicate-set-field
 function love.load()
 	love.keyboard.setKeyRepeat(true)
+
+	require("src.locale")
+	if not LoadLocale() then
+		SaveLocale()
+	end
 
 	require("src.stages")
 
