@@ -4,7 +4,12 @@ function Load_pre()
 	-- TODO: Load saved settings
 
 	-- Safely loading the locale (to prevent nil string)
-	local locale = require("locale." .. Locales[CurrentLocaleIndex])
+	local ok, locale = pcall(require, "locale." .. Locales[CurrentLocaleIndex])
+
+	if not ok then
+		error("Couldn't load locale '" .. Locales[CurrentLocaleIndex] .. "'(" .. CurrentLocaleIndex .. "): " .. locale)
+	end
+
 	for name, value in pairs(locale) do
 		CurrentLocale[name] = value
 	end
