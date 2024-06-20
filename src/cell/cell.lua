@@ -141,7 +141,38 @@ end
 function Cell:transferStorage(dst)
 	local stored = self:removeFromStorage()
 	---@diagnostic disable-next-line: param-type-mismatch
-	dst:addToStorage(stored)
+	for k, v in pairs(stored) do
+		if dst.storage[k] and dst.storage[k] ~= 0 then
+			local amount = dst.storage[k]
+			local preserve = 0
+			local availableDstCap = dst.type.maxCap - dst:storageCapacity()
+
+			if availableDstCap == 0 then
+				goto continue
+			end
+
+			if v > amount then
+				preserve = amount
+				amount = v - amount
+			elseif v < amount then
+				amount = v
+			end
+
+			if availableDstCap < amount then
+				preserve = amount - availableDstCap
+			end
+
+			dst:addToStorage(Content:new(k, amount))
+
+			if preserve ~= 0 then
+				self:addToStorage(Content:new(k, preserve))
+			end
+		else
+			dst:addToStorage(Content:new(k, v))
+		end
+
+	    ::continue::
+	end
 end
 
 function Cell:update(dt)
