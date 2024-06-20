@@ -171,7 +171,7 @@ function Cell:transferStorage(dst)
 			dst:addToStorage(Content:new(k, v))
 		end
 
-	    ::continue::
+		::continue::
 	end
 end
 
