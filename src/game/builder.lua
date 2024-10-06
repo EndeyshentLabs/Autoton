@@ -112,10 +112,10 @@ GameBuilder:addCell("junction", {
 
 		local conveyorType = GameBuilder.cellTypes.conveyor
 
-        local left = self:lookup(-1)
-        local right = self:lookup(1)
-        local up = self:lookup(0, -1)
-        local down = self:lookup(0, 1)
+		local left = self:lookup(-1)
+		local right = self:lookup(1)
+		local up = self:lookup(0, -1)
+		local down = self:lookup(0, 1)
 
 		if left and left.type == conveyorType and left.direction == Direction.RIGHT then
 			inputX = left
