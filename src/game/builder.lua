@@ -263,7 +263,6 @@ GameBuilder:addKeyboardBind("f5", {
 	callback = function()
 		MapReady = false
 		GenerateMap()
-		MapReady = true
 	end,
 })
 
