@@ -18,7 +18,7 @@ OreContentSpawnRates = {
 	[GameBuilder.contentTypes.oreGold] = 0.1,
 }
 
--- Mapgen "stretching" factor
-
+-- Mapgen "stretching" factors
+-- NOTE: Unused in Voronoi generator
 BasisX = 0.05
 BasisY = 0.1
