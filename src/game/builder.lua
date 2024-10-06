@@ -112,19 +112,24 @@ GameBuilder:addCell("junction", {
 
 		local conveyorType = GameBuilder.cellTypes.conveyor
 
-		if self:lookup(-1).type == conveyorType and self:lookup(-1).direction == Direction.RIGHT then
-			inputX = self:lookup(-1)
+        local left = self:lookup(-1)
+        local right = self:lookup(1)
+        local up = self:lookup(0, -1)
+        local down = self:lookup(0, 1)
+
+		if left and left.type == conveyorType and left.direction == Direction.RIGHT then
+			inputX = left
 			inputOffsetX = -1
-		elseif self:lookup(1).type == conveyorType and self:lookup(1).direction == Direction.LEFT then
-			inputX = self:lookup(1)
+		elseif right and right.type == conveyorType and right.direction == Direction.LEFT then
+			inputX = right
 			inputOffsetX = 1
 		end
 
-		if self:lookup(0, -1).type == conveyorType and self:lookup(0, -1).direction == Direction.DOWN then
-			inputY = self:lookup(0, -1)
+		if up and up.type == conveyorType and up.direction == Direction.DOWN then
+			inputY = up
 			inputOffsetY = -1
-		elseif self:lookup(0, 1).type == conveyorType and self:lookup(0, 1).direction == Direction.UP then
-			inputY = self:lookup(0, 1)
+		elseif down and down.type == conveyorType and down.direction == Direction.UP then
+			inputY = down
 			inputOffsetY = 1
 		end
 

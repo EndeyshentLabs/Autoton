@@ -72,7 +72,7 @@ end
 function Cell:lookup(relX, relY)
 	relX = relX or 0
 	relY = relY or 0
-	if (self.x + relX <= 0 or self.x + relX > CellAmount) or (self.y + relY <= 0 or self.x + relX > CellAmount) then
+	if (self.x + relX < 1 or self.x + relX > CellAmount) or (self.y + relY < 1 or self.x + relX > CellAmount) then
 		return nil
 	end
 	return Cells[self.x + relX][self.y + relY]
