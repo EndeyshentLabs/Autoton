@@ -59,3 +59,5 @@ luac.out
 *.hex
 
 love-*
+
+/.direnv/
