@@ -48,3 +48,11 @@ function ProtectEnum(e)
 		end,
 	})
 end
+
+-- Debug utils
+
+function DEBUG(...)
+	if IsDebug then
+		print(...)
+	end
+end
