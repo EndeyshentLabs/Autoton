@@ -188,8 +188,7 @@ GameBuilder:addKeyboardBind("space", {
 	displayName = "Print storage contents",
 	key = "space",
 	callback = function()
-		local x = love.mouse.getX() - Width / 2 + CameraX
-		local y = love.mouse.getY() - Height / 2 + CameraY
+		local x, y = Camera:mousePosition()
 		local a = math.ceil(x / CellSize)
 		local b = math.ceil(y / CellSize)
 

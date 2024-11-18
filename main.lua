@@ -68,8 +68,7 @@ function love.mousepressed(mouseX, mouseY, button)
 		return
 	end
 
-	local x = mouseX - Width / 2 + CameraX
-	local y = mouseY - Height / 2 + CameraY
+	local x, y = Camera:mousePosition()
 	local a = math.ceil(x / CellSize)
 	local b = math.ceil(y / CellSize)
 
