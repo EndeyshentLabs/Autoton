@@ -136,8 +136,8 @@ function love.keypressed(key, sc, rep)
 	end
 
 	-- TODO: Migrate this to keybind system(probably arrow keys)
-	if string.byte(key, 1, 1) >= string.byte("1", 1, 1) and string.byte(key, 1, 1) <= string.byte("9", 1, 1) then
-		local num = string.byte(key, 1, 1) - 48
+	if string.byte(sc, 1, 1) >= string.byte("1", 1, 1) and string.byte(sc, 1, 1) <= string.byte("9", 1, 1) then
+		local num = string.byte(sc, 1, 1) - 48
 		if num <= #BuildableCellTypes then
 			BuildSelection = BuildableCellTypes[num]
 			BuildSelectionNum = num
@@ -146,7 +146,7 @@ function love.keypressed(key, sc, rep)
 		return
 	end
 
-	local bind = KeyboardBinds[key]
+	local bind = KeyboardBinds[sc]
 
 	if bind then
 		bind.callback()
