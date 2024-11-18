@@ -117,6 +117,8 @@ end
 ---@field isStorage boolean Is cell buildable
 ---@field maxCap? integer Storage's max capacity
 ---@field time? number Is cell buildable
+---@field w? number Width of the cell
+---@field h? number Width of the cell
 
 ---@class KeyboardBindOpts
 ---@field displayName string

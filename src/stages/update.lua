@@ -1,12 +1,12 @@
 function Update_camera(dt)
-	if love.keyboard.isDown("w") then
+	if love.keyboard.isScancodeDown("w") then
 		CameraY = CameraY - 300 * dt
-	elseif love.keyboard.isDown("s") then
+	elseif love.keyboard.isScancodeDown("s") then
 		CameraY = CameraY + 300 * dt
 	end
-	if love.keyboard.isDown("a") then
+	if love.keyboard.isScancodeDown("a") then
 		CameraX = CameraX - 300 * dt
-	elseif love.keyboard.isDown("d") then
+	elseif love.keyboard.isScancodeDown("d") then
 		CameraX = CameraX + 300 * dt
 	end
 

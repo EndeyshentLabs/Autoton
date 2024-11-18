@@ -1,6 +1,8 @@
 function DrawGame()
 	-- Draw grid
 	if MapReady then
+		love.graphics.setLineWidth(1)
+
 		for x, _ in pairs(Cells) do
 			local xDrawn = false
 			local camX = CameraX - Width / 2
@@ -55,8 +57,8 @@ function DrawGame()
 			(a - 1) * CellSize + previewOffsetX,
 			(b - 1) * CellSize + previewOffsetY,
 			Rotation * math.rad(90),
-			CellSize / 128,
-			CellSize / 128
+			CellSize / 128 * (BuildSelection.w or 1),
+			CellSize / 128 * (BuildSelection.h or 1)
 		)
 	end
 end

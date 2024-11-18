@@ -48,6 +48,7 @@ ProtectEnum(Direction)
 ---@field content Content
 ---@field progress number
 ---@field under Cell|nil
+---@field occupied Cell|nil
 ---@field storage table<ContentOpts, integer>
 Cell = class("Cell", {
 	x = 0,
@@ -57,6 +58,7 @@ Cell = class("Cell", {
 	content = Content:new(),
 	progress = 0,
 	storage = {},
+	occupied = nil,
 })
 
 function Cell:init(x, y, _type, direction, content, under)
@@ -76,6 +78,88 @@ function Cell:lookup(relX, relY)
 		return nil
 	end
 	return Cells[self.x + relX][self.y + relY]
+end
+
+function Cell:get()
+	return self.occupied or self
+end
+
+function Cell:available(w, h, dir)
+	if dir == Direction.RIGHT then
+		for i = 0, w - 1 do
+			for j = 0, h - 1 do
+				local cell = self:lookup(i, j)
+				if not cell or cell.occupied then
+					return false
+				end
+			end
+		end
+	elseif dir == Direction.DOWN then
+		for i = 0, -w + 1, -1 do
+			for j = 0, h - 1 do
+				local cell = self:lookup(i, j)
+				if not cell or cell.occupied then
+					return false
+				end
+			end
+		end
+	elseif dir == Direction.LEFT then
+		for i = 0, -w + 1, -1 do
+			for j = 0, -h + 1, -1 do
+				local cell = self:lookup(i, j)
+				if not cell or cell.occupied then
+					return false
+				end
+			end
+		end
+	else -- Direction.UP
+		for i = 0, w - 1 do
+			for j = 0, -h + 1, -1 do
+				local cell = self:lookup(i, j)
+				if not cell or cell.occupied then
+					return false
+				end
+			end
+		end
+	end
+
+	return true
+end
+
+function Cell:unoccupy()
+	self:genericOccupy(self.type.w or 1, self.type.h or 1, nil)
+end
+
+function Cell:occupy(w, h)
+	self:genericOccupy(w, h, self)
+end
+
+function Cell:genericOccupy(w, h, with)
+	if self.direction == Direction.RIGHT then
+		for i = 0, w - 1 do
+			for j = 0, h - 1 do
+				self:lookup(i, j).occupied = with
+			end
+		end
+	elseif self.direction == Direction.DOWN then
+		for i = 0, -w + 1, -1 do
+			for j = 0, h - 1 do
+				self:lookup(i, j).occupied = with
+			end
+		end
+	elseif self.direction == Direction.LEFT then
+		for i = 0, -w + 1, -1 do
+			for j = 0, -h + 1, -1 do
+				self:lookup(i, j).occupied = with
+			end
+		end
+	else -- Direction.UP
+		for i = 0, w - 1 do
+			for j = 0, -h + 1, -1 do
+				self:lookup(i, j).occupied = with
+			end
+		end
+	end
 end
 
 ---@return integer
@@ -264,8 +348,8 @@ function DrawCell(cell)
 			(cell.x - 1) * CellSize + offsetX,
 			(cell.y - 1) * CellSize + offsetY,
 			cell.direction * math.rad(90),
-			CellSize / 128,
-			CellSize / 128
+			CellSize / 128 * (cell.type.w or 1),
+			CellSize / 128 * (cell.type.h or 1)
 		)
 
 		if cell.type.isStorage and AltView then

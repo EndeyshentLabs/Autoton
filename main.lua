@@ -68,8 +68,7 @@ function love.mousepressed(mouseX, mouseY, button)
 		return
 	end
 
-	local x = mouseX - Width / 2 + CameraX
-	local y = mouseY - Height / 2 + CameraY
+	local x, y = Camera:mousePosition()
 	local a = math.ceil(x / CellSize)
 	local b = math.ceil(y / CellSize)
 
@@ -77,10 +76,11 @@ function love.mousepressed(mouseX, mouseY, button)
 		return
 	end
 
-	print(("Mouse %d: %d, %d"):format(button, a, b))
+	local cell = Cells[a][b]:get()
 
-	local under =
-		Cell:new(a, b, Cells[a][b].type, nil, Content:new(Cells[a][b].content.opts, Cells[a][b].content.amount))
+	DEBUG(("Mouse %d: %d, %d"):format(button, a, b))
+
+	local under = Cell:new(a, b, cell.type, nil, Content:new(cell.content.opts, cell.content.amount))
 	local iserase = button == 2
 
 	if not iserase and (BuildSelectionNum == 0 or BuildSelection == CellType.NONE) then
@@ -91,14 +91,16 @@ function love.mousepressed(mouseX, mouseY, button)
 		if
 			(BuildSelection == GameBuilder.cellTypes.core and IsCorePlased)
 			or (BuildSelection == CellType.NONE and BuildSelectionNum == 0)
+			or not cell:available(BuildSelection.w or 1, BuildSelection.h or 1, Rotation)
 		then
 			goto exit
 		end
 
-		Cells[a][b].content.opts = DEFAULT_CONTENT_TYPE
-		Cells[a][b].content.amount = 0
-		Cells[a][b].direction = Rotation
-		Cells[a][b].type = BuildSelection
+		cell.content.opts = DEFAULT_CONTENT_TYPE
+		cell.content.amount = 0
+		cell.direction = Rotation
+		cell.type = BuildSelection
+		cell:occupy(BuildSelection.w or 1, BuildSelection.h or 1)
 
 		if BuildSelection == GameBuilder.cellTypes.core then
 			IsCorePlased = true
@@ -107,8 +109,8 @@ function love.mousepressed(mouseX, mouseY, button)
 		::exit::
 	end
 
-	if iserase and Cells[a][b].type ~= CellType.ORE then
-		if Cells[a][b].type == GameBuilder.cellTypes.core then
+	if iserase and cell.type ~= CellType.ORE then
+		if cell.type == GameBuilder.cellTypes.core then
 			IsCorePlased = false
 
 			for k, v in pairs(Core) do
@@ -117,15 +119,17 @@ function love.mousepressed(mouseX, mouseY, button)
 				end
 			end
 		end
-		Cells[a][b].type = CellType.NONE
+
+		cell:unoccupy()
+		cell.type = CellType.NONE
 	end
 
-	if not iserase and not Cells[a][b].under then
-		Cells[a][b].under = under
+	if not iserase and not cell.under then
+		cell.under = under
 	end
-	Cells[a][b].content.amount = 0
-	Cells[a][b].progress = 0
-	Cells[a][b].storage = {}
+	cell.content.amount = 0
+	cell.progress = 0
+	cell.storage = {}
 end
 
 ---@param key love.KeyConstant
@@ -137,8 +141,8 @@ function love.keypressed(key, sc, rep)
 	end
 
 	-- TODO: Migrate this to keybind system(probably arrow keys)
-	if string.byte(key, 1, 1) >= string.byte("1", 1, 1) and string.byte(key, 1, 1) <= string.byte("9", 1, 1) then
-		local num = string.byte(key, 1, 1) - 48
+	if string.byte(sc, 1, 1) >= string.byte("1", 1, 1) and string.byte(sc, 1, 1) <= string.byte("9", 1, 1) then
+		local num = string.byte(sc, 1, 1) - 48
 		if num <= #BuildableCellTypes then
 			BuildSelection = BuildableCellTypes[num]
 			BuildSelectionNum = num
@@ -147,7 +151,7 @@ function love.keypressed(key, sc, rep)
 		return
 	end
 
-	local bind = KeyboardBinds[key]
+	local bind = KeyboardBinds[sc]
 
 	if bind then
 		bind.callback()

@@ -22,12 +22,13 @@ GameBuilder:addCell("miner", {
 	---@param self Cell
 	---@param dt number
 	update = function(self, dt)
-		local cellUnder = self:lookup(0, 1)
+		local cellUnder = self:lookup(0, 1):get()
 		if
 			not cellUnder
 			or not cellUnder.type.isStorage
 			or (cellUnder.type.isStorage and cellUnder:isStorageFull())
 			or not self.under
+			or self.under.type ~= CellType.ORE
 		then
 			return
 		end
@@ -71,10 +72,11 @@ GameBuilder:addCell("conveyor", {
 			offset.y = -1
 		end
 
-		local dstCell = self:lookup(offset.x, offset.y)
+		local dstCell = self:lookup(offset.x, offset.y):get()
 		if not dstCell then
 			return
 		end
+		dstCell = dstCell:get() or dstCell
 
 		if not dstCell or not dstCell.type.isStorage or self:storageCapacity() == 0 or dstCell:isStorageFull() then
 			return
@@ -112,10 +114,10 @@ GameBuilder:addCell("junction", {
 
 		local conveyorType = GameBuilder.cellTypes.conveyor
 
-		local left = self:lookup(-1)
-		local right = self:lookup(1)
-		local up = self:lookup(0, -1)
-		local down = self:lookup(0, 1)
+		local left = self:lookup(-1):get()
+		local right = self:lookup(1):get()
+		local up = self:lookup(0, -1):get()
+		local down = self:lookup(0, 1):get()
 
 		if left and left.type == conveyorType and left.direction == Direction.RIGHT then
 			inputX = left
@@ -138,10 +140,10 @@ GameBuilder:addCell("junction", {
 		---@type Cell|nil
 		local dstY = nil
 		if inputOffsetX ~= 0 then
-			dstX = self:lookup(inputOffsetX * -1)
+			dstX = self:lookup(inputOffsetX * -1):get()
 		end
 		if inputOffsetY ~= 0 then
-			dstY = self:lookup(0, inputOffsetY * -1)
+			dstY = self:lookup(0, inputOffsetY * -1):get()
 		end
 
 		if inputX and dstX and dstX.type.isStorage and not dstX:isStorageFull() then
@@ -161,6 +163,8 @@ GameBuilder:addCell("storage", {
 	drawable = true,
 	isStorage = true,
 	maxCap = 64 * 3,
+	w = 3,
+	h = 3,
 })
 
 GameBuilder:addCell("core", {
@@ -188,8 +192,7 @@ GameBuilder:addKeyboardBind("space", {
 	displayName = "Print storage contents",
 	key = "space",
 	callback = function()
-		local x = love.mouse.getX() - Width / 2 + CameraX
-		local y = love.mouse.getY() - Height / 2 + CameraY
+		local x, y = Camera:mousePosition()
 		local a = math.ceil(x / CellSize)
 		local b = math.ceil(y / CellSize)
 
@@ -199,7 +202,9 @@ GameBuilder:addKeyboardBind("space", {
 		end
 
 		if s ~= nil and s ~= "" then
-			love.window.showMessageBox("Cell's storage", s, "info")
+			local contentsWdow = Some.addWindow("Cell's storage ", 100, 100, Font:getWidth(s), Font:getHeight() * 16)
+			Some.Wtext(contentsWdow, s, 0, 0)
+			-- love.window.showMessageBox("Cell's storage", s, "info", false)
 		end
 	end,
 })
