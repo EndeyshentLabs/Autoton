@@ -77,24 +77,23 @@ function Load_windows()
 	SettingsWdow = Some.addWindow(CurrentLocale.settingWindowTitle, 0, 0, 300, 600, false, true)
 	SettingsWdow.active = false
 
-	local vsyncButton = Some.WcheckButton(SettingsWdow, 0, margin(0), love.window.getVSync() == 1)
-	Some.Wtext(SettingsWdow, CurrentLocale.vsync, 20, margin(0) + 20 / 2 - Font:getHeight() / 2)
+	local vsyncButton = Some.WcheckButton(0, margin(0), love.window.getVSync() == 1)
+	SettingsWdow:attach(Some.Wtext(CurrentLocale.vsync, 20, margin(0) + 20 / 2 - Font:getHeight() / 2))
 
-	local fullscreenButton = Some.WcheckButton(SettingsWdow, 0, margin(20), love.window.getFullscreen())
-	Some.Wtext(SettingsWdow, CurrentLocale.fullscreen, 20, margin(0) + 20 / 2 - Font:getHeight() / 2)
+	local fullscreenButton = Some.WcheckButton(0, margin(20), love.window.getFullscreen())
+	SettingsWdow:attach(Some.Wtext(CurrentLocale.fullscreen, 20, margin(0) + 20 / 2 - Font:getHeight() / 2))
 
-	Some.Wtext(SettingsWdow, CurrentLocale.language .. ": (" .. CurrentLocale.requiresRestart .. ")", 0, margin(20))
-	local localeDropdown = Some.Wdropdown(SettingsWdow, 0, margin(20), Locales, CurrentLocaleIndex)
+	SettingsWdow:attach(Some.Wtext(CurrentLocale.language .. ": (" .. CurrentLocale.requiresRestart .. ")", 0, margin(20)))
+	local localeDropdown = Some.Wdropdown(0, margin(20), Locales, CurrentLocaleIndex)
 
-	Some.WtextButton(SettingsWdow, CurrentLocale.save, 0, SettingsWdow.h - Font:getHeight() * 2, function()
+	SettingsWdow:attach(Some.WtextButton(CurrentLocale.save, 0, SettingsWdow.h - Font:getHeight() * 2, function()
 		love.window.setVSync(vsyncButton.enabled)
 		love.window.setFullscreen(fullscreenButton.enabled)
 		CurrentLocaleIndex = localeDropdown.current
 		SaveLocale()
-	end)
+	end))
 
-	Some.WtextButton(
-		SettingsWdow,
+	SettingsWdow:attach(Some.WtextButton(
 		CurrentLocale.close,
 		Font:getWidth(CurrentLocale.save) + 2,
 		SettingsWdow.h - Font:getHeight() * 2,
@@ -102,7 +101,9 @@ function Load_windows()
 			SettingsWdow.active = false
 			Some:mousemoved(love.mouse.getX(), love.mouse.getY())
 		end
-	)
+	))
+
+	SettingsWdow:attach(vsyncButton, fullscreenButton, localeDropdown)
 end
 
 function Load_after()
